@@ -132,4 +132,4 @@ WHERE username = 'ваш_ник';
 
 ## Лицензия
 
-Укажите свою (например, MIT).
+intelwebz corp
