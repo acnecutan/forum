@@ -1,0 +1,14 @@
+services:
+  forum:
+    build: .
+    container_name: forum
+    ports:
+      - "${PORT:-3000}:3000"
+    env_file: .env
+    environment:
+      # Локально по http: при NODE_ENV=production cookie получают флаг Secure
+      # и браузер не сохранит сессию. Поэтому в compose — development.
+      NODE_ENV: development
+      PORT: 3000
+    restart: unless-stopped
+    stop_grace_period: 10s

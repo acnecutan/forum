@@ -1,0 +1,3137 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>YBNUCTBO</title>
+    <link rel="icon" type="image/x-icon" href="/favicon.ico">
+    <link rel="icon" type="image/png" sizes="32x32" href="/favicon-32x32.png">
+    <link rel="icon" type="image/png" sizes="16x16" href="/favicon-16x16.png">
+    <link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png">
+    <style>
+        :root {
+            --forum-bg-image: none;
+            --about-bg-image: none;
+        }
+        body::before {
+            content: ''; position: fixed; inset: 0;
+            background-image: var(--forum-bg-image);
+            background-size: cover; background-position: center;
+            opacity: 0.08; pointer-events: none; z-index: -1;
+        }
+        #about-hero::before {
+            content: ''; position: absolute; inset: 0;
+            background-image: var(--about-bg-image);
+            background-size: cover; background-position: center;
+            opacity: 0.18; pointer-events: none; z-index: 0;
+        }
+
+        ::-webkit-scrollbar { width: 6px; height: 6px; }
+        ::-webkit-scrollbar-track { background: #050505; }
+        ::-webkit-scrollbar-thumb { background: #220c0c; border-radius: 3px; }
+        ::-webkit-scrollbar-thumb:hover { background: #4a0000; }
+
+        body { background-color: #050505; color: #b0b0b0; font-family: sans-serif; max-width: 1100px; margin: 0 auto; padding: 20px; }
+        header, .block, .post { background-color: #0d0d0d; padding: 15px; margin-bottom: 15px; border-radius: 4px; border: 1px solid #220c0c; position: relative; }
+        
+        .layout-container { display: grid; grid-template-columns: 1fr 320px; gap: 20px; align-items: start; }
+        @media (max-width: 850px) { .layout-container { grid-template-columns: 1fr; } }
+
+        /* ── About fullscreen mode ── */
+        body.about-mode { max-width: none; padding: 0; overflow: hidden; }
+        body.about-mode header { display: none; }
+        body.about-mode #main-nav-tabs { display: none; }
+        body.about-mode .layout-container { display: block; }
+        body.about-mode .sidebar { display: none; }
+        body.about-mode .main-content { min-width: 0; }
+        body.about-mode #about-section { position: fixed; inset: 0; z-index: 100; }
+        #about-hero {
+            width: 100%; height: 100vh;
+            position: relative; overflow: hidden;
+            background: #030000;
+            display: flex; flex-direction: column;
+            align-items: center; justify-content: center;
+            text-align: center;
+        }
+        /* Back button shown only in about mode */
+        #about-nav-back {
+            display: none;
+            position: fixed; top: 14px; left: 18px; z-index: 200;
+        }
+        body.about-mode #about-nav-back { display: block; }
+
+        .main-content { min-width: 0; }
+        .sidebar { display: flex; flex-direction: column; gap: 15px; }
+        .sidebar-widget { background-color: #0d0d0d; border: 1px solid #220c0c; border-radius: 4px; padding: 15px; }
+        .sidebar-widget h3 { margin-top: 0; margin-bottom: 12px; color: #cfcfcf; font-size: 1.1em; border-bottom: 1px solid #2d1212; padding-bottom: 5px; }
+
+        .thread-card { cursor: pointer; transition: background-color 0.2s, border-color 0.2s; }
+        .thread-card:hover { background-color: #120707; border-color: #4a1414; }
+
+        input, textarea, button, select { background-color: #121212; color: #dcdcdc; border: 1px solid #2d1212; padding: 10px; margin: 5px 0; border-radius: 4px; width: 100%; box-sizing: border-box; font-size: 0.9em; }
+        textarea { resize: none; min-height: 90px; }
+        input:focus, textarea:focus, select:focus { outline: none; border-color: #660000; }
+        button { background-color: #4a0000; color: #c09999; cursor: pointer; font-weight: bold; border: 1px solid #2d1212; transition: background 0.2s, color 0.2s; width: auto; }
+        button:hover { background-color: #660000; color: #dcdcdc; }
+        
+        .file-upload-wrapper { position: relative; margin: 8px 0; }
+        .file-upload-btn { background-color: #121212; border: 1px dashed #4a0000; padding: 10px; border-radius: 4px; text-align: center; color: #888; cursor: pointer; font-size: 0.85em; display: block; transition: border-color 0.2s, color 0.2s; }
+        .file-upload-btn:hover { border-color: #ff3333; color: #ccc; }
+        .file-input-hidden { display: none; }
+        
+        .custom-checkbox-label { display: flex; align-items: center; cursor: pointer; position: relative; padding-left: 28px; margin: 10px 0; user-select: none; font-size: 0.9em; color: #aaa; }
+        .custom-checkbox-label input { display: none; }
+        .checkbox-box { position: absolute; top: 0; left: 0; height: 18px; width: 18px; background-color: #121212; border: 1px solid #2d1212; border-radius: 3px; transition: background-color 0.2s, border-color 0.2s; }
+        .custom-checkbox-label:hover input ~ .checkbox-box { border-color: #660000; }
+        .custom-checkbox-label input:checked ~ .checkbox-box { background-color: #4a0000; border-color: #ff3333; }
+        .checkbox-box:after { content: ""; position: absolute; display: none; left: 5px; top: 2px; width: 5px; height: 9px; border: solid #fff; border-width: 0 2px 2px 0; transform: rotate(45deg); }
+        .custom-checkbox-label input:checked ~ .checkbox-box:after { display: block; }
+
+        .color-picker-container { display: flex; gap: 10px; align-items: center; margin: 5px 0; }
+        .color-preview-dot { width: 38px; height: 38px; border-radius: 4px; border: 1px solid #2d1212; background-color: #909090; flex-shrink: 0; }
+
+        .attached-media { max-width: 100%; max-height: 450px; display: block; margin-top: 10px; border-radius: 4px; border: 1px solid #220c0c; }
+        
+        .profile-banner { width: 100%; height: 160px; background-color: #1a0a0a; background-size: cover; background-position: center; border-radius: 4px 4px 0 0; border: 1px solid #220c0c; }
+        .profile-header-box { display: flex; align-items: flex-end; gap: 20px; padding: 0 15px; margin-top: -50px; margin-bottom: 15px; }
+        
+        .avatar-main { width: 90px !important; height: 90px !important; min-width: 90px !important; min-height: 90px !important; max-width: 90px !important; max-height: 90px !important; border-radius: 5px; border: 3px solid #0d0d0d; background-color: #222; object-fit: cover; flex-shrink: 0 !important; }
+        .avatar-round { width: 32px !important; height: 32px !important; min-width: 32px !important; min-height: 32px !important; max-width: 32px !important; max-height: 32px !important; border-radius: 4px; object-fit: cover; background: #222; flex-shrink: 0 !important; }
+        
+        .thread-preview-layout { display: flex; gap: 15px; justify-content: space-between; align-items: flex-start; }
+        .thread-text-side { flex: 1; min-width: 0; }
+        .thread-media-side img { width: 100px; height: 100px; object-fit: cover; border-radius: 4px; border: 1px solid #331111; display: block; }
+
+        .tabs-container { display: flex; gap: 10px; margin-bottom: 15px; border-bottom: 1px solid #2d1212; padding-bottom: 10px; }
+        .tab-btn { background: #0d0d0d; border: 1px solid #2d1212; color: #777; width: auto; padding: 6px 15px; font-size: 0.9em; margin: 0; }
+        .tab-btn.active { background: #4a0000; color: #fff; border-color: #660000; }
+
+        .user-role-badge { font-size: 0.75em; font-weight: bold; padding: 1px 5px; border-radius: 3px; border: 1px solid; margin-left: 5px; text-transform: uppercase; display: inline-block; }
+        
+        .users-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(220px, 1fr)); gap: 15px; }
+        .user-card { background: #0d0d0d; border: 1px solid #220c0c; padding: 15px; border-radius: 4px; text-align: center; cursor: pointer; }
+        .user-card:hover { border-color: #4a0000; }
+        .user-card .avatar-main { width: 64px !important; height: 64px !important; min-width: 64px !important; min-height: 64px !important; max-width: 64px !important; max-height: 64px !important; margin: 0 auto 10px auto; display: block; border: none; }
+
+        .upvote-container { display: flex; align-items: center; gap: 5px; background: #121212; border: 1px solid #2d1212; padding: 2px 8px; border-radius: 4px; color: #888; font-weight: bold; font-size: 0.85em; width: auto; }
+        .upvote-container:hover { border-color: #ff3333; color: #ff3333; }
+        .upvote-btn { background: none; border: none; padding: 0; margin: 0; width: auto; color: inherit; cursor: pointer; font-size: 1.1em; }
+
+        .btn-delete, .btn-ban { background-color: #2a0000; color: #aa5555; border: 1px solid #551111; padding: 3px 8px; width: auto; font-size: 0.8em; margin: 0; }
+        .btn-delete:hover, .btn-ban:hover { background-color: #550000; color: #ffaaaa; }
+        
+        .thread-pinned { border-left: 4px solid #ff3333 !important; }
+        .thread-featured { background: linear-gradient(135deg, #160505 0%, #0d0d0d 100%); border: 1px dashed #660000; }
+        .pin-icon { color: #ff3333; font-weight: bold; margin-right: 5px; }
+        .hidden { display: none !important; }
+        .flex { display: flex; justify-content: space-between; align-items: center; }
+        .post-meta { font-size: 0.8em; color: #5a5a5a; margin-bottom: 5px; display: flex; justify-content: space-between; align-items: center; gap: 10px; flex-wrap: wrap; }
+        .post-meta .meta-left { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; }
+        .auth-toggle { font-size: 0.9em; text-align: center; margin-top: 10px; color: #777; }
+        h2, h3 { color: #cfcfcf; } 
+        a { color: #aa2828; text-decoration: none; cursor: pointer; }
+        a:hover { text-decoration: underline; color: #cc3333; }
+        h1 a { color: #660000; font-weight: bold; font-family: monospace; }
+        h1 a:hover { color: #aa2828; text-decoration: none; }
+
+        .bio-display { background: #080808; border: 1px solid #1a1a1a; padding: 15px; border-radius: 4px; font-size: 0.95em; color: #aaa; white-space: pre-wrap; margin-top: 10px; }
+
+        .stat-item { display: flex; justify-content: space-between; font-size: 0.9em; margin-bottom: 6px; color: #909090; }
+        .stat-item span:last-child { color: #dcdcdc; font-weight: bold; }
+        
+        .online-dot { width: 8px; height: 8px; background-color: #00ff66; border-radius: 50%; display: inline-block; margin-right: 6px; box-shadow: 0 0 6px #00ff66; }
+        .online-user-tag { display: inline-flex; align-items: center; font-size: 0.85em; background: #121212; border: 1px solid #2d1212; padding: 3px 8px; border-radius: 12px; margin: 3px; }
+        
+        .avatar-group { display: flex; gap: 5px; flex-wrap: wrap; margin-top: 10px; }
+        .avatar-group img { width: 32px !important; height: 32px !important; min-width: 32px !important; min-height: 32px !important; max-width: 32px !important; max-height: 32px !important; border-radius: 4px; object-fit: cover; border: 1px solid #2d1212; cursor: pointer; flex-shrink: 0 !important; background: #222; }
+
+        .sidebar-list-item { font-size: 0.85em; border-bottom: 1px dashed #1a0a0a; padding: 8px 0; }
+        .sidebar-list-item:last-child { border-bottom: none; }
+        .sidebar-list-title { font-weight: bold; color: #aa2828; display: block; margin-bottom: 2px; }
+        
+        .activity-item { display: flex; gap: 8px; font-size: 0.85em; padding: 6px 0; border-bottom: 1px dashed #1a0a0a; align-items: center; }
+        .activity-item img { width: 24px !important; height: 24px !important; min-width: 24px !important; min-height: 24px !important; max-width: 24px !important; max-height: 24px !important; border-radius: 3px; object-fit: cover; flex-shrink: 0 !important; background: #222; }
+
+        .tag-cloud { display: flex; flex-wrap: wrap; gap: 5px; }
+        .tag-badge { font-size: 0.75em; background: #160505; border: 1px solid #4a0000; color: #c09999; padding: 3px 8px; border-radius: 3px; cursor: pointer; }
+        .tag-badge:hover { background: #4a0000; color: #fff; }
+        
+        .thread-tags-container { display: flex; gap: 5px; margin-top: 5px; }
+
+        .main-content, .block, .post, #opened-thread, #reply-block, .bio-display, .sidebar-widget, .thread-text-side, .sidebar-list-item, .activity-item div, h2, h3, p {
+            overflow-wrap: break-word; word-wrap: break-word; word-break: break-word; hyphens: auto; max-width: 100%;
+        }
+
+        pre, code {
+            white-space: pre-wrap; overflow-x: auto; max-width: 100%; background: #121212; padding: 10px; border-radius: 4px; border: 1px solid #2d1212; display: block; font-family: monospace; color: #ffaaaa;
+        }
+        
+        /* Profile wall comment styles */
+        .profile-comments-section { margin-top: 20px; }
+        .comment-item { border-bottom: 1px solid #1a0a0a; padding: 10px 0; }
+        .comment-item:last-child { border-bottom: none; }
+
+        /* ── Chat & DM styles ── */
+        .nav-badge {
+            display: inline-block; background: #cc0000; color: #fff; font-size: 0.7em;
+            font-weight: bold; border-radius: 10px; padding: 1px 6px; margin-left: 4px;
+            vertical-align: middle; min-width: 18px; text-align: center;
+        }
+        .chat-layout { display: flex; flex-direction: column; height: 520px; background-color: #0d0d0d; }
+        .chat-messages {
+            flex: 1; overflow-y: auto; padding: 12px; display: flex;
+            flex-direction: column; gap: 8px; scrollbar-width: thin;
+            background-color: #0d0d0d;
+        }
+        .chat-message { display: flex; gap: 10px; align-items: flex-start; animation: fadeInMsg 0.15s ease; }
+        @keyframes fadeInMsg { from { opacity: 0; transform: translateY(4px); } to { opacity: 1; transform: none; } }
+        .chat-message .msg-avatar { width: 30px; height: 30px; border-radius: 4px; object-fit: cover; background: #222; cursor: pointer; flex-shrink: 0; }
+        .chat-message .msg-body { flex: 1; min-width: 0; }
+        .chat-message .msg-header { display: flex; align-items: center; gap: 8px; margin-bottom: 3px; flex-wrap: wrap; }
+        .chat-message .msg-author { font-weight: bold; font-size: 0.9em; cursor: pointer; }
+        .chat-message .msg-time { font-size: 0.75em; color: #555; }
+        .chat-message .msg-text { color: #ccc; font-size: 0.9em; word-break: break-word; white-space: pre-wrap; line-height: 1.4; }
+        .chat-message .msg-delete { background: none; border: none; color: #441111; font-size: 0.8em; cursor: pointer; padding: 0; margin: 0; width: auto; opacity: 0; transition: opacity 0.15s; }
+        .chat-message:hover .msg-delete { opacity: 1; }
+        .chat-message .msg-delete:hover { color: #ff3333; }
+        .chat-mine { flex-direction: row-reverse; }
+        .chat-mine .msg-body { align-items: flex-end; display: flex; flex-direction: column; }
+        .chat-mine .msg-header { flex-direction: row-reverse; }
+        .chat-mine .msg-text { background: #160404; border: 1px solid #3a0000; padding: 6px 10px; border-radius: 4px 0 4px 4px; display: inline-block; max-width: 85%; }
+        .chat-other .msg-text { background: #0d0d0d; border: 1px solid #1e1e1e; padding: 6px 10px; border-radius: 0 4px 4px 4px; display: inline-block; max-width: 85%; }
+        .chat-input-row { display: flex; gap: 8px; padding: 10px; border-top: 1px solid #2d1212; align-items: flex-end; background-color: #0d0d0d; }
+        .chat-input-row textarea { flex: 1; resize: none; min-height: 38px; max-height: 100px; margin: 0; padding: 8px 10px; font-size: 0.9em; overflow-y: auto; background-color: #121212; color: #dcdcdc; border: 1px solid #2d1212; border-radius: 4px; }
+        .chat-input-row button { width: auto; padding: 8px 16px; margin: 0; align-self: flex-end; flex-shrink: 0; }
+        .chat-typing-indicator { font-size: 0.78em; color: #555; padding: 4px 12px; min-height: 20px; font-style: italic; background-color: #0d0d0d; }
+        .chat-connected-dot { display: inline-block; width: 7px; height: 7px; background: #00cc55; border-radius: 50%; margin-right: 5px; box-shadow: 0 0 5px #00cc55; }
+        .chat-disconnected-dot { display: inline-block; width: 7px; height: 7px; background: #884444; border-radius: 50%; margin-right: 5px; }
+        .dm-layout { display: flex; height: 520px; gap: 0; background-color: #0d0d0d; }
+        .dm-sidebar { width: 200px; border-right: 1px solid #2d1212; overflow-y: auto; display: flex; flex-direction: column; flex-shrink: 0; background-color: #0a0303; }
+        .dm-sidebar-header { padding: 10px 12px; font-size: 0.85em; color: #777; text-transform: uppercase; font-weight: bold; border-bottom: 1px solid #2d1212; flex-shrink: 0; background-color: #0a0303; }
+        .dm-new-btn { margin: 8px; padding: 6px; font-size: 0.8em; background: #1a0505; border: 1px solid #4a0000; color: #c09999; text-align: center; cursor: pointer; border-radius: 4px; transition: background 0.15s; }
+        .dm-new-btn:hover { background: #4a0000; color: #fff; }
+        .dm-conv-item { display: flex; gap: 8px; padding: 10px 12px; cursor: pointer; border-bottom: 1px solid #1a0808; align-items: center; transition: background 0.15s; position: relative; background-color: #0a0303; }
+        .dm-conv-item:hover { background: #120404; }
+        .dm-conv-item.active { background: #1a0404; border-left: 3px solid #cc0000; }
+        .dm-conv-item img { width: 28px; height: 28px; border-radius: 4px; object-fit: cover; flex-shrink: 0; background: #222; }
+        .dm-conv-info { flex: 1; min-width: 0; }
+        .dm-conv-name { font-size: 0.85em; font-weight: bold; color: #ccc; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+        .dm-conv-preview { font-size: 0.75em; color: #555; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+        .dm-unread-badge { background: #cc0000; color: #fff; font-size: 0.7em; font-weight: bold; border-radius: 10px; padding: 1px 5px; flex-shrink: 0; min-width: 16px; text-align: center; }
+        .dm-main { flex: 1; display: flex; flex-direction: column; min-width: 0; background-color: #0d0d0d; }
+        .dm-main-header { padding: 10px 14px; border-bottom: 1px solid #2d1212; font-weight: bold; font-size: 0.9em; color: #ccc; display: flex; align-items: center; gap: 10px; flex-shrink: 0; background-color: #0d0d0d; }
+        .dm-messages { flex: 1; overflow-y: auto; padding: 12px; display: flex; flex-direction: column; gap: 8px; background-color: #0d0d0d; }
+        .dm-empty { display: flex; align-items: center; justify-content: center; height: 100%; color: #444; font-size: 0.9em; text-align: center; }
+        .dm-new-convo-form { display: flex; gap: 8px; padding: 10px; border-bottom: 1px solid #2d1212; align-items: center; background: #0a0303; }
+        .dm-new-convo-form input { flex: 1; margin: 0; padding: 6px 10px; font-size: 0.85em; background-color: #121212; color: #dcdcdc; border: 1px solid #2d1212; border-radius: 4px; }
+        .dm-new-convo-form button { width: auto; margin: 0; padding: 6px 14px; font-size: 0.85em; }
+        #dm-input-row textarea { background-color: #121212; color: #dcdcdc; border: 1px solid #2d1212; border-radius: 4px; }
+        .dm-message { display: flex; gap: 8px; align-items: flex-start; animation: fadeInMsg 0.15s ease; }
+        .dm-message .msg-avatar { width: 26px; height: 26px; border-radius: 3px; object-fit: cover; background: #222; flex-shrink: 0; cursor: pointer; }
+        .dm-msg-mine { flex-direction: row-reverse; }
+        .dm-msg-mine .dm-msg-text { background: #160404; border: 1px solid #3a0000; border-radius: 4px 0 4px 4px; }
+        .dm-msg-other .dm-msg-text { background: #0d0d0d; border: 1px solid #1e1e1e; border-radius: 0 4px 4px 4px; }
+        .dm-msg-text { padding: 6px 10px; font-size: 0.88em; color: #ccc; word-break: break-word; white-space: pre-wrap; line-height: 1.4; max-width: 85%; }
+        .dm-msg-time { font-size: 0.72em; color: #555; display: block; margin-top: 3px; text-align: right; }
+        .dm-msg-mine .dm-msg-time { text-align: left; }
+        .dm-msg-delete { background: none; border: none; color: #441111; font-size: 0.75em; cursor: pointer; padding: 0; width: auto; opacity: 0; transition: opacity 0.15s; align-self: center; margin: 0; }
+        .dm-message:hover .dm-msg-delete { opacity: 1; }
+        .dm-msg-delete:hover { color: #ff3333; }
+
+        /* ── Notifications ── */
+        .notif-bell-wrap { position: relative; display: inline-block; }
+        .notif-bell-btn {
+            background: none; border: none; color: #888; font-size: 1.2em;
+            cursor: pointer; padding: 0 4px; margin: 0; width: auto; line-height: 1;
+            transition: color 0.15s;
+        }
+        .notif-bell-btn:hover { color: #ff3333; background: none; }
+        .notif-bell-badge {
+            position: absolute; top: -4px; right: -4px;
+            background: #cc0000; color: #fff; font-size: 0.62em; font-weight: bold;
+            border-radius: 10px; padding: 1px 5px; min-width: 15px; text-align: center;
+            pointer-events: none;
+        }
+        .notif-dropdown {
+            display: block; position: absolute; right: 0; top: calc(100% + 6px);
+            width: 320px; max-height: 400px; overflow-y: auto;
+            background: #0d0d0d; border: 1px solid #2d1212; border-radius: 4px;
+            z-index: 9999; box-shadow: 0 4px 20px rgba(0,0,0,0.6);
+        }
+        .notif-header {
+            display: flex; justify-content: space-between; align-items: center;
+            padding: 10px 14px; border-bottom: 1px solid #2d1212;
+            font-size: 0.85em; font-weight: bold; color: #aaa;
+        }
+        .notif-header button {
+            background: none; border: none; color: #666; font-size: 0.85em;
+            cursor: pointer; padding: 0; margin: 0; width: auto;
+        }
+        .notif-header button:hover { color: #ff3333; background: none; }
+        .notif-item {
+            display: flex; gap: 10px; align-items: flex-start;
+            padding: 10px 14px; border-bottom: 1px solid #160505;
+            cursor: pointer; transition: background 0.12s; font-size: 0.85em;
+        }
+        .notif-item:last-child { border-bottom: none; }
+        .notif-item:hover { background: #120404; }
+        .notif-item.unread { background: #0f0303; }
+        .notif-item.unread:hover { background: #150505; }
+        .notif-icon { font-size: 1.1em; flex-shrink: 0; margin-top: 1px; }
+        .notif-body { flex: 1; min-width: 0; }
+        .notif-text { color: #ccc; line-height: 1.4; }
+        .notif-text b { color: #ff3333; }
+        .notif-time { color: #444; font-size: 0.8em; margin-top: 2px; }
+        .notif-empty { padding: 20px; text-align: center; color: #444; font-size: 0.85em; }
+
+        /* ════════════════════════════════════════════════════════════════
+           ── GLOBAL ANIMATIONS ──
+           Простые, лёгкие анимации: затухание/появление секций и карточек,
+           плавные hover-эффекты, без влияния на производительность.
+           ════════════════════════════════════════════════════════════════ */
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to   { opacity: 1; }
+        }
+        @keyframes popIn {
+            from { opacity: 0; transform: scale(0.96); }
+            to   { opacity: 1; transform: scale(1); }
+        }
+
+        /* Появление секций при переключении вкладок.
+           ВАЖНО: используем только opacity (без transform/translateY) —
+           transform на контейнере секции создаёт новый containing block
+           для position:fixed потомков (например #about-section,
+           #about-nav-back), что ломало fullscreen-режим About на телефонах. */
+        #forum-section:not(.hidden),
+        #users-section:not(.hidden),
+        #profile-section:not(.hidden),
+        #thread-view-section:not(.hidden),
+        #chat-section:not(.hidden),
+        #dm-section:not(.hidden) {
+            animation: fadeIn 0.3s ease both;
+        }
+
+        /* Карточки тредов, блоки, виджеты сайдбара — лёгкое появление и поднятие при наведении */
+        .thread-card, .block, .post, .sidebar-widget {
+            animation: fadeIn 0.3s ease both;
+            transition: background-color 0.2s, border-color 0.2s, transform 0.18s ease, box-shadow 0.18s ease;
+        }
+        .thread-card:hover, .user-card:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 14px rgba(0,0,0,0.35);
+        }
+        .sidebar-widget:hover {
+            border-color: #3a1414;
+        }
+
+        /* Карточки участников: transition есть (для hover), но БЕЗ
+           анимации появления на каждой карточке — на странице Members
+           рендерится сразу много .user-card, и индивидуальная fadeIn-
+           анимация на каждой вызывала заметный лаг/подвисание при
+           переключении на вкладку. Вместо этого один общий fade на
+           весь грид, который перезапускается через JS-класс при каждой
+           отрисовке (см. loadUsers) — статичный CSS-animation на контейнере
+           срабатывал бы только один раз, при первой загрузке страницы. */
+        .user-card {
+            transition: background-color 0.2s, border-color 0.2s, transform 0.18s ease, box-shadow 0.18s ease;
+        }
+        .users-grid.fade-in {
+            animation: fadeIn 0.25s ease both;
+        }
+
+        /* Кнопки: плавное нажатие и подсветка.
+           Табы (.tab-btn) ИСКЛЮЧЕНЫ из transform на :active — на телефонах
+           .tabs-container скроллится по горизонтали, и transform/scale на
+           кнопке во время тапа сбивал жест прокрутки (ломал скролл вкладок). */
+        button {
+            transition: background 0.2s, color 0.2s, transform 0.1s ease, box-shadow 0.2s ease;
+        }
+        button:hover { box-shadow: 0 2px 10px rgba(102,0,0,0.35); }
+        button:not(.tab-btn):active { transform: scale(0.97); }
+
+        /* Ссылки навигации и табов */
+        .tab-btn, #main-nav-tabs a, nav a {
+            transition: background 0.2s, color 0.2s, border-color 0.2s;
+        }
+        @media (hover: hover) and (pointer: fine) {
+            .tab-btn:hover { transform: translateY(-1px); transition: background 0.2s, color 0.2s, border-color 0.2s, transform 0.15s ease; }
+        }
+
+        /* Контейнер вкладок: явный горизонтальный скролл на узких экранах,
+           чтобы вкладки не переносились/не ломали раскладку на телефонах. */
+        .tabs-container {
+            overflow-x: auto;
+            -webkit-overflow-scrolling: touch;
+            flex-wrap: nowrap;
+        }
+        .tabs-container .tab-btn {
+            flex-shrink: 0;
+        }
+
+        /* Аватарки и медиа — лёгкий зум при наведении там, где это кликабельно */
+        .avatar-round, .avatar-main, .thread-media-side img, .avatar-group img {
+            transition: transform 0.18s ease, filter 0.18s ease;
+        }
+        .avatar-round[onclick]:hover, .avatar-main[onclick]:hover,
+        .thread-media-side img:hover, .avatar-group img:hover {
+            transform: scale(1.06);
+        }
+
+        /* Изображения вложений — мягкое появление */
+        .attached-media {
+            animation: fadeIn 0.4s ease both;
+        }
+
+        /* Бейджи / индикаторы уведомлений — лёгкая пульсация при появлении */
+        .notif-bell-badge, .nav-badge, .dm-unread-badge {
+            animation: popIn 0.25s ease both;
+        }
+
+        /* Дропдаун уведомлений — плавное открытие */
+        .notif-dropdown {
+            opacity: 0; transform: translateY(-6px) scale(0.98);
+            transition: opacity 0.18s ease, transform 0.18s ease;
+            pointer-events: none;
+        }
+        .notif-dropdown.open {
+            opacity: 1; transform: translateY(0) scale(1);
+            pointer-events: auto;
+        }
+        .notif-item { animation: fadeIn 0.25s ease both; }
+
+        /* Список элементов сайдбара / активности — мягкий каскад появления */
+        .sidebar-list-item, .activity-item, .online-user-tag, .tag-badge {
+            animation: fadeIn 0.3s ease both;
+        }
+
+        /* Прогресс-бары и переключатели чекбоксов уже плавные — добавим инерцию чекбоксу */
+        .checkbox-box {
+            transition: background-color 0.2s, border-color 0.2s, transform 0.15s ease;
+        }
+        .custom-checkbox-label input:checked ~ .checkbox-box {
+            animation: popIn 0.2s ease both;
+        }
+
+        /* Уважение к настройкам пользователя: отключаем анимации, если он просил меньше движения */
+        @media (prefers-reduced-motion: reduce) {
+            *, *::before, *::after {
+                animation-duration: 0.001ms !important;
+                animation-iteration-count: 1 !important;
+                transition-duration: 0.001ms !important;
+            }
+        }
+    </style>
+</head>
+<body>
+
+    <!-- Back button — visible only in about-mode (CSS controlled) -->
+    <div id="about-nav-back">
+        <button onclick="showSection('forum')" style="
+            width:auto; padding:7px 16px; font-size:0.78em; font-family:monospace;
+            background:rgba(4,0,0,0.75); border:1px solid #2a0e0e; color:#553333;
+            border-radius:4px; cursor:pointer; backdrop-filter:blur(6px);
+            letter-spacing:0.06em; transition:color 0.15s, border-color 0.15s;
+        " onmouseover="this.style.color='#aa2828'; this.style.borderColor='#550000';"
+           onmouseout="this.style.color='#553333'; this.style.borderColor='#2a0e0e';">
+            ← FORUM
+        </button>
+    </div>
+
+    <header class="flex">
+        <h1><a href="#" onclick="showSection('forum')">YBNUCTBO</a></h1>
+        <div style="display:flex; align-items:center; gap:12px;">
+            <div class="notif-bell-wrap" id="notif-bell-wrap" style="display:none;">
+                <button class="notif-bell-btn" onclick="toggleNotifDropdown()" title="Notifications">
+  <svg width="18" height="18" viewBox="0 0 18 18" fill="none" xmlns="http://www.w3.org/2000/svg" style="display:block;">
+    <path d="M9 2.5C6.5 2.5 5 4.2 5 6.5v4.5l-1 1.5h10l-1-1.5V6.5C13 4.2 11.5 2.5 9 2.5z" stroke="currentColor" stroke-width="1.3" stroke-linejoin="round"/>
+    <path d="M7.5 13.5a1.5 1.5 0 003 0" stroke="currentColor" stroke-width="1.3" stroke-linecap="round"/>
+    <circle cx="9" cy="2.5" r="0.7" fill="currentColor"/>
+  </svg>
+</button>
+                <span class="notif-bell-badge hidden" id="notif-badge">0</span>
+                <div class="notif-dropdown" id="notif-dropdown">
+                    <div class="notif-header">
+                        <span>Notifications</span>
+                        <button onclick="markAllNotifsRead()">Mark all read</button>
+                    </div>
+                    <div id="notif-list"><div class="notif-empty">No notifications</div></div>
+                </div>
+            </div>
+            <div id="auth-status"></div>
+        </div>
+    </header>
+
+    <div id="auth-section" class="block hidden">
+        <div id="login-form">
+            <h3>Sign In</h3>
+            <input type="text" id="login-username" placeholder="Username or Email">
+            <input type="password" id="login-password" placeholder="Password">
+            <button onclick="login()">Sign In</button>
+            <div class="auth-toggle">Don't have an account? <a href="#" onclick="toggleAuthMode('register')">Create one</a></div>
+        </div>
+        <div id="register-form" class="hidden">
+            <h3>Register</h3>
+            <input type="text" id="reg-username" placeholder="Choose a username">
+            <input type="email" id="reg-email" placeholder="Enter your Email">
+            <input type="password" id="reg-password" placeholder="Choose a password">
+            <button onclick="register()">Register</button>
+            <div class="auth-toggle">Already have an account? <a href="#" onclick="toggleAuthMode('login')">Sign in</a></div>
+        </div>
+    </div>
+
+    <div class="tabs-container" id="main-nav-tabs">
+        <button id="nav-forum" class="tab-btn active" onclick="showSection('forum')">Forum</button>
+        <button id="nav-users" class="tab-btn" onclick="showSection('users')">Members</button>
+        <button id="nav-my-profile" class="tab-btn hidden" onclick="openMyProfile()">My Profile</button>
+        <button id="nav-chat" class="tab-btn" onclick="showSection('chat')">Chat <span id="chat-unread-badge" class="nav-badge hidden">0</span></button>
+        <button id="nav-dm" class="tab-btn hidden" onclick="showSection('dm')">Messages <span id="dm-unread-badge" class="nav-badge hidden">0</span></button>
+        <button id="nav-about" class="tab-btn" onclick="showSection('about')">About</button>
+    </div>
+
+    <div class="layout-container">
+        <div class="main-content">
+            <div id="forum-section">
+                <div class="tabs-container">
+                    <button id="tab-new" class="tab-btn active" onclick="changeSort('new')">Latest</button>
+                    <button id="tab-popular" class="tab-btn" onclick="changeSort('popular')">Popular</button>
+                    <button id="open-create-thread-btn" class="tab-btn hidden" onclick="toggleCreateThreadModal(true)" style="margin-left:auto;">+ New Thread</button>
+                    <span id="active-tag-filter-display" style="font-size:0.85em; align-self:center; color:#ff3333; font-weight:bold; cursor:pointer;" onclick="clearTagFilter()"></span>
+                </div>
+
+                <div id="threads-list"></div>
+                <div id="pagination" style="display:flex; justify-content:center; align-items:center; gap:6px; margin-top:16px; flex-wrap:wrap;"></div>
+            </div>
+
+            <div id="users-section" class="hidden">
+                <div class="tabs-container" style="margin-bottom:15px;">
+                    <button id="members-tab-btn" class="tab-btn active" onclick="switchMembersTab('members')">Members</button>
+                    <button id="roles-tab-btn" class="tab-btn hidden" onclick="switchMembersTab('roles')">⚙️ Roles</button>
+                </div>
+
+                <!-- Members list -->
+                <div id="members-tab">
+                    <div id="users-list" class="users-grid"></div>
+                </div>
+
+                <!-- Roles management (admin only) -->
+                <div id="roles-tab" class="hidden">
+                    <div class="block" style="margin-bottom:12px;">
+                        <p style="color:#666; font-size:0.85em; margin:0;">Drag roles to set their display order. Users with higher roles appear first in the Members list. <b style="color:#aaa;">USER</b> is always last and cannot be moved.</p>
+                    </div>
+                    <div id="roles-drag-list" style="display:flex; flex-direction:column; gap:8px;"></div>
+                    <div style="display:flex; gap:8px; margin-top:16px; align-items:center;">
+                        <input type="text" id="new-role-name" placeholder="New role name..." style="max-width:200px; margin:0;">
+                        <input type="color" id="new-role-color" value="#909090" style="width:48px; height:38px; padding:2px; margin:0; flex-shrink:0;">
+                        <button onclick="addNewRole()" style="width:auto; margin:0;">+ Add Role</button>
+                        <button onclick="saveHierarchy()" style="width:auto; margin:0; background:#003300; border-color:#005500; color:#88ff88;">💾 Save</button>
+                    </div>
+                </div>
+            </div>
+
+            <div id="profile-section" class="hidden">
+                <div id="profile-view-box"></div>
+                
+                <div id="profile-edit-box" class="block hidden">
+                    <h3>Edit Profile</h3>
+                    <div class="file-upload-wrapper">
+                        <label for="edit-avatar" id="edit-avatar-label" class="file-upload-btn">Change avatar</label>
+                        <input type="file" id="edit-avatar" class="file-input-hidden" accept="image/jpeg,image/png,image/gif,image/webp" onchange="updateFileLabel('edit-avatar', 'edit-avatar-label')">
+                    </div>
+                    <div class="file-upload-wrapper">
+                        <label for="edit-banner" id="edit-banner-label" class="file-upload-btn">Change profile banner</label>
+                        <input type="file" id="edit-banner" class="file-input-hidden" accept="image/jpeg,image/png,image/gif,image/webp" onchange="updateFileLabel('edit-banner', 'edit-banner-label')">
+                    </div>
+                    <label style="font-size: 0.85em; color: #666; display:block; margin-top: 10px;">About me:</label>
+                    <textarea id="edit-bio" placeholder="Tell something about yourself..."></textarea>
+                    <button onclick="saveProfile()">Save Changes</button>
+                </div>
+
+                <!-- Profile wall block -->
+                <div id="profile-comments-block" class="block">
+                    <h3>Profile Wall</h3>
+                    <div id="profile-comment-form-container" class="hidden" style="margin-bottom: 20px;">
+                        <textarea id="profile-comment-input" placeholder="Leave a message on this wall..."></textarea>
+                        <button onclick="sendProfileComment()">Post Comment</button>
+                    </div>
+                    <div id="profile-comments-list"></div>
+                </div>
+            </div>
+
+            <div id="thread-view-section" class="hidden">
+                <button onclick="history.back()" style="width: auto; padding: 5px 15px; margin-bottom: 10px;">← Back</button>
+                <div id="opened-thread"></div>
+                <h3>Replies</h3>
+                <div id="reply-block"></div>
+            </div>
+
+            <!-- ─── GLOBAL CHAT ─────────────────────────────────────────────── -->
+            <div id="chat-section" class="hidden">
+                <div class="block" style="padding: 0;">
+                    <div style="padding: 12px 15px; border-bottom: 1px solid #2d1212; display: flex; align-items: center; gap: 8px;">
+                        <span id="chat-status-dot" class="chat-disconnected-dot"></span>
+                        <span style="font-weight: bold; color: #cfcfcf;">Global Chat</span>
+                        <span id="chat-online-count" style="font-size: 0.8em; color: #555;"></span>
+                    </div>
+                    <div class="chat-layout">
+                        <div class="chat-messages" id="chat-messages-box"></div>
+                        <div class="chat-typing-indicator" id="chat-typing-text"></div>
+                        <div class="chat-input-row">
+                            <textarea id="chat-input" placeholder="Write a message..." rows="1"
+                                onkeydown="chatHandleKey(event)"
+                                oninput="chatAutoResize(this); chatTyping()"></textarea>
+                            <button onclick="sendChatMessage()">Send</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- ─── PRIVATE MESSAGES ────────────────────────────────────────── -->
+            <div id="dm-section" class="hidden">
+                <div class="block" style="padding: 0;">
+                    <div style="padding: 10px 15px; border-bottom: 1px solid #2d1212;">
+                        <span style="font-weight: bold; color: #cfcfcf; font-size: 1em;">Private Messages</span>
+                    </div>
+                    <div class="dm-layout">
+                        <div class="dm-sidebar">
+                            <div class="dm-sidebar-header">Conversations</div>
+                            <div class="dm-new-btn" onclick="dmStartNew()">+ New conversation</div>
+                            <div id="dm-conv-list"></div>
+                        </div>
+                        <div class="dm-main">
+                            <div id="dm-new-convo-row" class="dm-new-convo-form hidden">
+                                <input type="text" id="dm-new-username" placeholder="Username..." autocomplete="off"
+                                    onkeydown="if(event.key==='Enter') dmOpenConversation(document.getElementById('dm-new-username').value.trim())">
+                                <button onclick="dmOpenConversation(document.getElementById('dm-new-username').value.trim())">Go</button>
+                                <button onclick="document.getElementById('dm-new-convo-row').classList.add('hidden')" style="background:#1a0505; color:#888;">✕</button>
+                            </div>
+                            <div class="dm-main-header" id="dm-main-header">
+                                <div class="dm-empty" style="font-size: 0.85em; color: #555;">Select a conversation or start a new one</div>
+                            </div>
+                            <div class="dm-messages" id="dm-messages-box">
+                                <div class="dm-empty" id="dm-empty-hint">
+                                    <div><div style="font-size: 2em; margin-bottom: 8px;">💬</div>Select a conversation<br>or start a new one</div>
+                                </div>
+                            </div>
+                            <div class="chat-input-row" id="dm-input-row" style="display:none;">
+                                <textarea id="dm-input" placeholder="Write a message..." rows="1"
+                                    onkeydown="dmHandleKey(event)"
+                                    oninput="chatAutoResize(this)"></textarea>
+                                <button onclick="sendDMMessage()">Send</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- ─── ABOUT ────────────────────────────────────────────────────── -->
+            <div id="about-section" class="hidden">
+
+                <!-- Ambient audio element -->
+                <audio id="about-audio" loop></audio>
+
+                <!-- ── Fullscreen Hero ───────────────────────────────────────── -->
+                <div id="about-hero">
+
+                    <!-- Scanline overlay -->
+                    <div style="
+                        position:absolute; inset:0; pointer-events:none; z-index:0;
+                        background:repeating-linear-gradient(
+                            0deg,
+                            transparent, transparent 2px,
+                            rgba(0,0,0,0.15) 2px, rgba(0,0,0,0.15) 4px
+                        );
+                    "></div>
+
+                    <!-- Radial vignette -->
+                    <div style="
+                        position:absolute; inset:0; pointer-events:none; z-index:0;
+                        background:radial-gradient(ellipse at center, transparent 30%, rgba(0,0,0,0.82) 100%);
+                    "></div>
+
+                    <!-- Particle canvas -->
+                    <canvas id="about-particles" style="position:absolute; inset:0; width:100%; height:100%; pointer-events:none; z-index:0;"></canvas>
+
+                    <!-- ── Centre content ──────────────────────────────────── -->
+                    <div style="position:relative; z-index:1; display:flex; flex-direction:column; align-items:center; gap:0;">
+
+                        <!-- Title -->
+                        <div id="about-main-title" style="
+                            font-family:monospace; font-size:clamp(2.2em,6vw,4.5em); font-weight:bold;
+                            letter-spacing:0.18em; color:#660000; line-height:1;
+                            text-shadow: 0 0 40px rgba(180,0,0,0.5), 0 0 80px rgba(100,0,0,0.25);
+                            animation: heroGlow 4s ease-in-out infinite;
+                            margin-bottom:10px;
+                        "><a href="#" onclick="showSection('forum'); return false;" style="color:inherit; text-decoration:none; cursor:pointer;" onmouseover="this.style.textShadow='0 0 60px rgba(220,0,0,0.8), 0 0 120px rgba(150,0,0,0.4)'" onmouseout="this.style.textShadow=''">YBNUCTBO</a></div>
+
+                        <!-- Subtitle -->
+                        <div id="about-subtitle" style="
+                            font-family:monospace; font-size:0.78em; color:#3a1515;
+                            letter-spacing:0.22em; margin-bottom:28px;
+                        "><a href="https://t.me/YBNUCTBO" target="_blank" style="color:#3a1515; text-decoration:none;" onmouseover="this.style.color='#7a2525'" onmouseout="this.style.color='#3a1515'">@YBNUCTBO</a> · <a href="https://t.me/THE_DIGGERS" target="_blank" style="color:#3a1515; text-decoration:none;" onmouseover="this.style.color='#7a2525'" onmouseout="this.style.color='#3a1515'">@THE_DIGGERS</a></div>
+
+                        <!-- About text block (editable by admin) -->
+                        <div style="max-width:520px; width:100%; padding:0 20px; box-sizing:border-box;">
+
+                            <!-- Display mode -->
+                            <div id="about-text-display" style="
+                                font-family:monospace; font-size:0.82em; color:#4a2020;
+                                line-height:2; white-space:pre-wrap; letter-spacing:0.04em;
+                                text-align:center;
+                            "> </div>
+
+                            <!-- Edit mode (admin only) -->
+                            <div id="about-text-edit" class="hidden" style="text-align:left;">
+                                <textarea id="about-text-input" style="
+                                    font-family:monospace; font-size:0.82em; min-height:90px;
+                                    color:#ccc; line-height:1.8; background:#0a0202;
+                                    border:1px solid #3a1010; border-radius:4px;
+                                "></textarea>
+                                <div style="display:flex; gap:8px; margin-top:8px; justify-content:center;">
+                                    <button onclick="aboutSaveText()" style="width:auto; padding:5px 14px; font-size:0.8em;">Save</button>
+                                    <button onclick="aboutCancelEdit()" style="width:auto; padding:5px 14px; font-size:0.8em; background:#121212; color:#666; border-color:#2d1212;">Cancel</button>
+                                </div>
+                            </div>
+
+                            <!-- Edit button (admin only) -->
+                            <button onclick="aboutToggleEdit()" id="about-edit-btn" class="hidden" style="
+                                display:block; margin:10px auto 0; width:auto; padding:3px 12px;
+                                font-size:0.72em; background:transparent; border:1px solid #2a1010;
+                                color:#3a1515; letter-spacing:0.08em;
+                            ">edit text</button>
+                        </div>
+                    </div>
+
+                    <!-- ── Mini Player — bottom-right ──────────────────────── -->
+                    <div id="about-mini-player" style="
+                        position:absolute; bottom:20px; right:22px; z-index:2;
+                        display:flex; align-items:center; gap:10px;
+                        background:rgba(4,0,0,0.78); backdrop-filter:blur(8px);
+                        border:1px solid #2a0e0e; border-radius:6px;
+                        padding:9px 14px 9px 9px; min-width:230px; max-width:340px;
+                    ">
+                        <!-- Play/Pause -->
+                        <button id="about-play-btn" onclick="aboutTogglePlay()" title="Play / Pause" style="
+                            width:36px; height:36px; min-width:36px; border-radius:50%;
+                            padding:0; margin:0; background:#1a0505; border:1.5px solid #660000;
+                            display:flex; align-items:center; justify-content:center;
+                            cursor:pointer; flex-shrink:0; transition:background 0.15s, border-color 0.15s;
+                        " onmouseover="this.style.background='#2a0808'; this.style.borderColor='#aa0000';"
+                           onmouseout="this.style.background='#1a0505'; this.style.borderColor='#660000';">
+                            <svg id="about-play-icon" width="13" height="13" viewBox="0 0 14 14" fill="none" style="display:block; margin-left:1px;">
+                                <polygon points="3,1.5 12.5,7 3,12.5" fill="#cc3333"/>
+                            </svg>
+                            <svg id="about-pause-icon" width="13" height="13" viewBox="0 0 14 14" fill="none" style="display:none;">
+                                <rect x="2" y="1" width="4" height="12" rx="1" fill="#cc3333"/>
+                                <rect x="8" y="1" width="4" height="12" rx="1" fill="#cc3333"/>
+                            </svg>
+                        </button>
+
+                        <!-- Track info -->
+                        <div style="flex:1; min-width:0;">
+                            <div id="about-track-name" style="
+                                font-size:0.76em; color:#cfcfcf; font-family:monospace;
+                                white-space:nowrap; overflow:hidden; text-overflow:ellipsis; margin-bottom:4px;
+                            ">no track loaded</div>
+                            <!-- Seek bar -->
+                            <div style="position:relative; height:2px; background:#2a0808; border-radius:2px; cursor:pointer; margin-bottom:4px;"
+                                 onclick="aboutSeek(event, this)" id="about-progress-bar">
+                                <div id="about-progress-fill" style="
+                                    height:100%; background:#660000; border-radius:2px;
+                                    width:0%; transition:width 0.3s linear; pointer-events:none;
+                                "></div>
+                            </div>
+                            <div style="display:flex; align-items:center; justify-content:space-between; gap:6px;">
+                                <div id="about-track-time" style="font-size:0.66em; color:#444; font-family:monospace; white-space:nowrap;">0:00 / 0:00</div>
+                                <div style="display:flex; align-items:center; gap:5px;">
+                                    <span style="color:#3a1515; font-size:0.72em;">♪</span>
+                                    <input type="range" id="about-volume" min="0" max="1" step="0.01" value="0.7"
+                                        style="width:56px; height:2px; accent-color:#660000; cursor:pointer; padding:0; border:none; background:none;">
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- ── Admin upload panel — bottom-left ────────────────── -->
+                    <div id="about-change-track-box" class="hidden" style="
+                        position:absolute; bottom:20px; left:22px; z-index:2;
+                        background:rgba(4,0,0,0.82); backdrop-filter:blur(8px);
+                        border:1px solid #2a0e0e; border-radius:6px;
+                        padding:10px 14px; max-width:380px; width:calc(50vw - 60px); min-width:240px;
+                    ">
+                        <div style="font-size:0.68em; color:#3a1515; text-transform:uppercase; letter-spacing:0.14em; margin-bottom:8px; font-family:monospace;">
+                            ⚙ track · <span style="color:#553333; text-transform:none; font-style:italic;">plays for everyone</span>
+                        </div>
+                        <div style="display:flex; gap:6px; flex-wrap:wrap; align-items:center;">
+                            <div class="file-upload-wrapper" style="flex:1; min-width:130px; margin:0;">
+                                <label for="about-music-file" id="about-music-label" class="file-upload-btn" style="margin:0; font-size:0.78em; padding:7px 10px;">
+                                    Upload file
+                                </label>
+                                <input type="file" id="about-music-file" class="file-input-hidden"
+                                    accept="audio/*" onchange="aboutLoadLocalTrack(this)">
+                            </div>
+                            <input type="text" id="about-music-url" placeholder="or paste URL…"
+                                style="flex:1; min-width:120px; margin:0; font-size:0.78em; padding:7px 9px; background:#0a0202; border-color:#2a0e0e;"
+                                onkeydown="if(event.key==='Enter') aboutLoadUrl()">
+                            <button onclick="aboutLoadUrl()" style="width:auto; padding:7px 11px; font-size:0.78em; flex-shrink:0;">Load</button>
+                            <button onclick="aboutRemoveTrack()" title="Remove track" style="width:auto; padding:7px 9px; font-size:0.78em; flex-shrink:0; background:#1a0505; color:#aa5555; border-color:#551111;">✕</button>
+                        </div>
+                        <div style="margin-top:10px; border-top:1px solid #2a0e0e; padding-top:10px;">
+                            <div style="font-size:0.68em; color:#3a1515; text-transform:uppercase; letter-spacing:0.14em; margin-bottom:8px; font-family:monospace;">🖼 about background</div>
+                            <div style="display:flex; gap:6px; flex-wrap:wrap; align-items:center;">
+                                <div class="file-upload-wrapper" style="flex:1; min-width:130px; margin:0;">
+                                    <label for="about-bg-file" id="about-bg-label" class="file-upload-btn" style="margin:0; font-size:0.78em; padding:7px 10px;">Upload image</label>
+                                    <input type="file" id="about-bg-file" class="file-input-hidden" accept="image/jpeg,image/png,image/gif,image/webp" onchange="aboutBgUpload(this)">
+                                </div>
+                                <button onclick="aboutBgRemove()" style="width:auto; padding:7px 9px; font-size:0.78em; flex-shrink:0; background:#1a0505; color:#aa5555; border-color:#551111;">✕</button>
+                            </div>
+                            <div id="about-bg-preview" style="margin-top:4px; font-size:0.72em; color:#444; font-family:monospace;"></div>
+                        </div>
+                    </div>
+
+                    <style>
+                        @keyframes heroGlow {
+                            0%,100% { text-shadow: 0 0 20px rgba(180,0,0,0.3); }
+                            50%      { text-shadow: 0 0 60px rgba(220,0,0,0.7), 0 0 120px rgba(120,0,0,0.3); }
+                        }
+                    </style>
+
+                    <script>
+                    (function() {
+                        let _particleRAF = null;
+                        let _particlesInit = false;
+
+                        function initParticles() {
+                            if (_particlesInit) return;
+                            const canvas = document.getElementById('about-particles');
+                            if (!canvas) return;
+                            _particlesInit = true;
+
+                            const ctx = canvas.getContext('2d');
+                            const NUM = 90;
+                            let W, H, particles;
+
+                            function resize() {
+                                W = canvas.width = canvas.offsetWidth;
+                                H = canvas.height = canvas.offsetHeight;
+                            }
+
+                            function mkParticle() {
+                                return {
+                                    x: Math.random() * W,
+                                    y: Math.random() * H,
+                                    r: Math.random() * 1.6 + 0.3,
+                                    vx: (Math.random() - 0.5) * 0.35,
+                                    vy: (Math.random() - 0.5) * 0.35 - 0.08,
+                                    alpha: Math.random() * 0.5 + 0.1,
+                                    flicker: Math.random() * Math.PI * 2,
+                                    flickerSpeed: Math.random() * 0.03 + 0.008,
+                                    color: Math.random() < 0.6
+                                        ? `rgba(${100 + Math.floor(Math.random()*80)},0,0,`
+                                        : `rgba(${60 + Math.floor(Math.random()*40)},${Math.floor(Math.random()*15)},${Math.floor(Math.random()*15)},`
+                                };
+                            }
+
+                            resize();
+                            particles = Array.from({length: NUM}, mkParticle);
+                            window.addEventListener('resize', resize);
+
+                            function draw() {
+                                ctx.clearRect(0, 0, W, H);
+                                particles.forEach(p => {
+                                    p.flicker += p.flickerSpeed;
+                                    const a = p.alpha * (0.6 + 0.4 * Math.sin(p.flicker));
+                                    ctx.beginPath();
+                                    ctx.arc(p.x, p.y, p.r, 0, Math.PI * 2);
+                                    ctx.fillStyle = p.color + a + ')';
+                                    ctx.fill();
+                                    // soft glow
+                                    if (p.r > 0.9) {
+                                        const g = ctx.createRadialGradient(p.x, p.y, 0, p.x, p.y, p.r * 4);
+                                        g.addColorStop(0, p.color + (a * 0.25) + ')');
+                                        g.addColorStop(1, p.color + '0)');
+                                        ctx.beginPath();
+                                        ctx.arc(p.x, p.y, p.r * 4, 0, Math.PI * 2);
+                                        ctx.fillStyle = g;
+                                        ctx.fill();
+                                    }
+                                    p.x += p.vx;
+                                    p.y += p.vy;
+                                    if (p.x < -5) p.x = W + 5;
+                                    if (p.x > W + 5) p.x = -5;
+                                    if (p.y < -5) p.y = H + 5;
+                                    if (p.y > H + 5) p.y = H + 5;
+                                    if (p.y < -5) { p.y = H + 2; p.x = Math.random() * W; }
+                                });
+
+                                // draw faint connecting lines
+                                for (let i = 0; i < particles.length; i++) {
+                                    for (let j = i + 1; j < particles.length; j++) {
+                                        const dx = particles[i].x - particles[j].x;
+                                        const dy = particles[i].y - particles[j].y;
+                                        const dist = Math.sqrt(dx*dx + dy*dy);
+                                        if (dist < 90) {
+                                            ctx.beginPath();
+                                            ctx.moveTo(particles[i].x, particles[i].y);
+                                            ctx.lineTo(particles[j].x, particles[j].y);
+                                            ctx.strokeStyle = `rgba(100,0,0,${0.07 * (1 - dist/90)})`;
+                                            ctx.lineWidth = 0.5;
+                                            ctx.stroke();
+                                        }
+                                    }
+                                }
+
+                                _particleRAF = requestAnimationFrame(draw);
+                            }
+                            draw();
+                        }
+
+                        function stopParticles() {
+                            if (_particleRAF) { cancelAnimationFrame(_particleRAF); _particleRAF = null; }
+                        }
+
+                        // Hook into showSection
+                        document.addEventListener('DOMContentLoaded', function() {
+                            const origShow = window.showSection;
+                            window.showSection = function(s) {
+                                if (typeof origShow === 'function') origShow(s);
+                                if (s === 'about') {
+                                    setTimeout(initParticles, 50);
+                                } else {
+                                    stopParticles();
+                                    _particlesInit = false;
+                                }
+                            };
+
+                            // Also start if about is active on load
+                            const aboutSection = document.getElementById('about-section');
+                            if (aboutSection && !aboutSection.classList.contains('hidden')) {
+                                setTimeout(initParticles, 100);
+                            }
+                        });
+                    })();
+                    </script>
+
+                </div><!-- /about-hero -->
+
+            </div>
+        </div>
+
+        <div class="sidebar">
+            <div class="sidebar-widget" style="padding: 10px;">
+                <input type="text" id="search-input" placeholder="Search posts, replies, users..." oninput="debounceSearch()" style="margin:0;">
+            </div>
+            <div class="sidebar-widget">
+                <h3>Community Stats</h3>
+                <div id="widget-stats-counters">
+                    <div class="stat-item"><span>Members:</span><span id="stat-users-count">0</span></div>
+                    <div class="stat-item"><span>Threads:</span><span id="stat-threads-count">0</span></div>
+                    <div class="stat-item"><span>Replies:</span><span id="stat-replies-count">0</span></div>
+                </div>
+                <h4 style="margin: 12px 0 6px 0; font-size:0.85em; color:#777; text-transform:uppercase;">Online:</h4>
+                <div id="widget-online-list" style="max-height: 100px; overflow-y:auto;"></div>
+                <h4 style="margin: 12px 0 6px 0; font-size:0.85em; color:#777; text-transform:uppercase;">News:</h4>
+                <div id="widget-new-users" class="avatar-group"></div>
+            </div>
+            <div class="sidebar-widget">
+                <h3>Trending</h3>
+                <div id="widget-trending-list"></div>
+            </div>
+            <div class="sidebar-widget">
+                <h3>Recent Activity</h3>
+                <div id="widget-activity-stream"></div>
+            </div>
+            <div class="sidebar-widget">
+                <h3>Popular Tags</h3>
+                <div id="widget-tags-cloud" class="tag-cloud">
+                    <span style="font-size:0.82em; color:#444;">Loading...</span>
+                </div>
+            </div>
+            <div class="sidebar-widget">
+                <h3>Top Posters</h3>
+                <div id="widget-top-posters"></div>
+            </div>
+            <div class="sidebar-widget">
+                <h3>Staff</h3>
+                <div id="widget-staff-list" style="margin-bottom:12px;"></div>
+                <h3>Important Links</h3>
+                <div style="display:flex; flex-direction:column; gap:6px; font-size:0.9em;">
+                    <a href="https://discord.gg/uskfpHgtbZ" target="_blank"> FAQ</a>
+                    <a href="https://t.me/YBNUCTBO" target="_blank"> Our Telegram</a>
+                    <a href="https://discord.gg/uskfpHgtbZ" target="_blank"> Discord Server</a>
+                </div>
+            </div>
+
+            <!-- Forum BG admin panel (admin only) -->
+            <div id="forum-bg-admin-panel" class="sidebar-widget hidden">
+                <div style="font-size:0.68em; color:#3a1515; text-transform:uppercase; letter-spacing:0.14em; margin-bottom:8px; font-family:monospace;">🖼 forum background</div>
+                <div style="display:flex; gap:6px; flex-wrap:wrap; align-items:center;">
+                    <div class="file-upload-wrapper" style="flex:1; min-width:130px; margin:0;">
+                        <label for="forum-bg-file" id="forum-bg-label" class="file-upload-btn" style="margin:0; font-size:0.78em; padding:7px 10px;">Upload image</label>
+                        <input type="file" id="forum-bg-file" class="file-input-hidden" accept="image/jpeg,image/png,image/gif,image/webp" onchange="forumBgUpload(this)">
+                    </div>
+                    <button onclick="forumBgRemove()" style="width:auto; padding:7px 9px; font-size:0.78em; flex-shrink:0; background:#1a0505; color:#aa5555; border-color:#551111;">✕</button>
+                </div>
+                <div id="forum-bg-preview" style="margin-top:4px; font-size:0.72em; color:#444; font-family:monospace;"></div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let currentUser = null;
+        let currentThreadId = null;
+        let currentSort = 'new';
+        let viewedProfileId = null;
+        let activeTagFilter = null;
+        let searchTimeout = null;
+        let currentPage = 1;
+        let totalThreads = 0;
+        const THREADS_PER_PAGE = 10;
+        let currentUsersPage = 1;
+        let totalUsers = 0;
+        const USERS_PER_PAGE = 24;
+        let currentReplyPage = 1;
+        let totalReplies = 0;
+        const REPLIES_PER_PAGE = 20;
+
+        const DEFAULT_AVATAR = "data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='%23333333'><rect width='24' height='24' fill='%231a1a1a'/><path d='M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z'/></svg>";
+        const DEFAULT_BANNER = "data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='800' height='200'><rect width='800' height='200' fill='%23110505'/></svg>";
+
+        function safeText(str) {
+            if (!str) return '';
+            const div = document.createElement('div');
+            div.innerText = str;
+            return div.innerHTML;
+        }
+
+        // Converts URLs in already-escaped text into clickable <a> tags.
+        // Input must be HTML-escaped first (via safeText), so all < > & are safe.
+        function linkify(escapedHtml) {
+            if (!escapedHtml) return '';
+            // Match http/https URLs (already HTML-escaped, so & → &amp; is handled)
+            return escapedHtml.replace(
+                /(https?:\/\/[^\s<>"')\]]+)/g,
+                url => `<a href="${url}" target="_blank" rel="noopener noreferrer" style="color:#ff5555; text-decoration:underline; word-break:break-all;">${url}</a>`
+            );
+        }
+
+        function renderOneFile(fileUrl) {
+            if (!fileUrl) return '';
+            const safeUrl = encodeURI(fileUrl);
+            const pathPart = fileUrl.split('?')[0];
+            const ext = pathPart.split('.').pop().toLowerCase();
+            const fileName = pathPart.split('/').pop();
+            const isCloudinaryAudio = fileUrl.includes('res.cloudinary.com') && fileUrl.includes('/video/upload/');
+            const isCloudinaryImage = fileUrl.includes('res.cloudinary.com') && fileUrl.includes('/image/upload/');
+            const IMAGE_EXTS = ['jpg','jpeg','png','gif','webp'];
+            const AUDIO_EXTS = ['mp3','wav','ogg','m4a','aac','flac','opus'];
+            const VIDEO_EXTS = ['mp4','webm','mov','avi'];
+            if (IMAGE_EXTS.includes(ext) || isCloudinaryImage) {
+                return `<img src="${safeUrl}" class="attached-media">`;
+            }
+            if (AUDIO_EXTS.includes(ext) || (isCloudinaryAudio && !VIDEO_EXTS.includes(ext))) {
+                return `<div style="margin-top:10px;"><audio controls src="${safeUrl}" style="width:100%; max-width:400px;"></audio></div>`;
+            }
+            if (['mp4', 'webm', 'mov'].includes(ext)) {
+                return `<div style="margin-top:10px;"><video controls src="${safeUrl}" class="attached-media" style="max-height:360px; background:#000;"></video></div>`;
+            }
+            return `
+                <div style="margin-top:10px; padding:10px; background:#121212; border:1px dashed #4a0000; border-radius:4px; display:inline-flex; align-items:center; gap:10px;">
+                    <span style="font-size:1.5em;">📄</span>
+                    <div>
+                        <span style="font-size:0.85em; color:#888; display:block;">Attached file:</span>
+                        <a href="${safeUrl}" download style="font-weight:bold; color:#ff3333; text-decoration:underline;">${safeText(fileName)}</a>
+                    </div>
+                </div>`;
+        }
+
+        // Accepts a post object with images_json (array) and legacy image_url fallback
+        function renderAttachedFile(fileUrlOrObj, imagesJsonStr) {
+            // Called with (post_object) OR legacy (url_string)
+            let urls = [];
+            if (typeof fileUrlOrObj === 'string') {
+                // Legacy single-url call: try to use imagesJsonStr if provided
+                try { urls = JSON.parse(imagesJsonStr || '[]'); } catch(e) {}
+                if (!urls.length && fileUrlOrObj) urls = [fileUrlOrObj];
+            } else if (fileUrlOrObj && typeof fileUrlOrObj === 'object') {
+                try { urls = JSON.parse(fileUrlOrObj.images_json || '[]'); } catch(e) {}
+                if (!urls.length && fileUrlOrObj.image_url) urls = [fileUrlOrObj.image_url];
+            }
+            if (!urls.length) return '';
+            return `<div style="display:flex; flex-wrap:wrap; gap:8px; margin-top:8px;">${urls.map(u => renderOneFile(u)).join('')}</div>`;
+        }
+
+        async function localFetch(url, options = {}) {
+            options.credentials = 'include'; 
+            return fetch(url, options);
+        }
+
+        async function checkAuthOnLoad() {
+            try {
+                const res = await localFetch('/api/auth/me');
+                if (res.ok) {
+                    const data = await res.json();
+                    if (data.authenticated) {
+                        currentUser = data.user;
+                    } else {
+                        currentUser = null;
+                    }
+                }
+            } catch (e) {
+                console.error("Session check error:", e);
+                currentUser = null;
+            }
+            updateAuthStatus();
+            loadBackgrounds();
+            loadSidebarWidgets();
+            routeFromPath();
+        }
+
+        function updateFileLabel(inputId, labelId) {
+            const input = document.getElementById(inputId);
+            const label = document.getElementById(labelId);
+            if(input.files && input.files.length > 0) {
+                label.innerText = `File selected: ${input.files[0].name}`;
+                label.style.borderColor = "#ff3333"; label.style.color = "#ff3333";
+            } else {
+                label.innerText = "Attach file (any format)";
+                label.style.borderColor = "#4a0000"; label.style.color = "#888";
+            }
+        }
+
+        function updateMultiFileLabel(inputId, labelId) {
+            const input = document.getElementById(inputId);
+            const label = document.getElementById(labelId);
+            const MAX_FILES = 5;
+            const MAX_MB = 5;
+            if (!input.files || input.files.length === 0) {
+                label.innerText = `Attach files (up to ${MAX_FILES}, max ${MAX_MB} MB each)`;
+                label.style.borderColor = "#4a0000"; label.style.color = "#888";
+                return;
+            }
+            if (input.files.length > MAX_FILES) {
+                alert(`Maximum ${MAX_FILES} files allowed. Please select fewer files.`);
+                input.value = '';
+                label.innerText = `Attach files (up to ${MAX_FILES}, max ${MAX_MB} MB each)`;
+                label.style.borderColor = "#4a0000"; label.style.color = "#888";
+                return;
+            }
+            for (const f of input.files) {
+                if (f.size > MAX_MB * 1024 * 1024) {
+                    alert(`File "${f.name}" exceeds the ${MAX_MB} MB size limit.`);
+                    input.value = '';
+                    label.innerText = `Attach files (up to ${MAX_FILES}, max ${MAX_MB} MB each)`;
+                    label.style.borderColor = "#4a0000"; label.style.color = "#888";
+                    return;
+                }
+            }
+            const names = Array.from(input.files).map(f => f.name).join(', ');
+            label.innerText = `${input.files.length} file(s): ${names}`;
+            label.style.borderColor = "#ff3333"; label.style.color = "#ff3333";
+        }
+
+        function navigate(path) {
+            if (window.location.pathname + window.location.search !== path) {
+                history.pushState(null, '', path);
+            }
+        }
+
+        function showSection(section) {
+            // Pause about-page music when leaving the About tab
+            if (section !== 'about') {
+                var _aboutAudio = document.getElementById('about-audio');
+                if (_aboutAudio && !_aboutAudio.paused) _aboutAudio.pause();
+                document.body.classList.remove('about-mode');
+            } else {
+                document.body.classList.add('about-mode');
+            }
+
+            document.getElementById('forum-section').classList.add('hidden');
+            document.getElementById('users-section').classList.add('hidden');
+            document.getElementById('profile-section').classList.add('hidden');
+            document.getElementById('thread-view-section').classList.add('hidden');
+            document.getElementById('chat-section').classList.add('hidden');
+            document.getElementById('dm-section').classList.add('hidden');
+            document.getElementById('about-section').classList.add('hidden');
+            document.getElementById('nav-forum').classList.remove('active');
+            document.getElementById('nav-users').classList.remove('active');
+            document.getElementById('nav-my-profile').classList.remove('active');
+            document.getElementById('nav-chat').classList.remove('active');
+            document.getElementById('nav-dm').classList.remove('active');
+            document.getElementById('nav-about').classList.remove('active');
+
+            if (section === 'forum') {
+                navigate('/');
+                document.getElementById('forum-section').classList.remove('hidden');
+                document.getElementById('nav-forum').classList.add('active');
+                currentPage = 1;
+                loadThreads();
+            } else if (section === 'users') {
+                navigate('/members');
+                document.getElementById('users-section').classList.remove('hidden');
+                document.getElementById('nav-users').classList.add('active');
+                if (currentUser && currentUser.isAdmin) {
+                    document.getElementById('roles-tab-btn').classList.remove('hidden');
+                } else {
+                    document.getElementById('roles-tab-btn').classList.add('hidden');
+                }
+                switchMembersTab('members');
+            } else if (section === 'thread') {
+                document.getElementById('thread-view-section').classList.remove('hidden');
+            } else if (section === 'profile') {
+                document.getElementById('profile-section').classList.remove('hidden');
+            } else if (section === 'chat') {
+                navigate('/chat');
+                document.getElementById('chat-section').classList.remove('hidden');
+                document.getElementById('nav-chat').classList.add('active');
+                initChat();
+            } else if (section === 'dm') {
+                navigate('/dm');
+                document.getElementById('dm-section').classList.remove('hidden');
+                document.getElementById('nav-dm').classList.add('active');
+                initDMStream();
+                loadDMConversations();
+                refreshDMUnreadBadge();
+            } else if (section === 'about') {
+                navigate('/about');
+                document.getElementById('about-section').classList.remove('hidden');
+                document.getElementById('nav-about').classList.add('active');
+                aboutInitPlayer();
+            }
+            updateAuthStatus();
+            loadSidebarWidgets();
+        }
+
+        // ── ABOUT PAGE LOGIC ──────────────────────────────────────────────────
+        var _aboutPlayerInited = false;
+        var _aboutAutoplayBound = false;
+
+        function aboutInitPlayer() {
+            // Load the global about text from server
+            aboutLoadText();
+
+            // Restore saved volume (per-browser preference)
+            try {
+                var savedVol = localStorage.getItem('about_volume');
+                if (savedVol !== null) {
+                    var volEl = document.getElementById('about-volume');
+                    var audio = document.getElementById('about-audio');
+                    if (volEl) volEl.value = savedVol;
+                    if (audio) audio.volume = parseFloat(savedVol);
+                }
+            } catch(e) {}
+
+            // Load (and try to play) the GLOBAL track — same for every visitor
+            aboutLoadGlobalTrack();
+
+            if (_aboutPlayerInited) return;
+            _aboutPlayerInited = true;
+
+            var audio = document.getElementById('about-audio');
+            if (!audio) return;
+
+            audio.addEventListener('timeupdate', function() {
+                if (!this.duration) return;
+                var pct = (this.currentTime / this.duration) * 100;
+                var fill = document.getElementById('about-progress-fill');
+                var time = document.getElementById('about-track-time');
+                if (fill) fill.style.width = pct + '%';
+                if (time) time.textContent = aboutFmtTime(this.currentTime) + ' / ' + aboutFmtTime(this.duration);
+            });
+            audio.addEventListener('play', function() {
+                var pi = document.getElementById('about-play-icon');
+                var pa = document.getElementById('about-pause-icon');
+                if (pi) pi.style.display = 'none';
+                if (pa) pa.style.display = 'block';
+            });
+            audio.addEventListener('pause', function() {
+                var pi = document.getElementById('about-play-icon');
+                var pa = document.getElementById('about-pause-icon');
+                if (pi) pi.style.display = 'block';
+                if (pa) pa.style.display = 'none';
+            });
+            audio.addEventListener('ended', function() {
+                var pi = document.getElementById('about-play-icon');
+                var pa = document.getElementById('about-pause-icon');
+                if (pi) pi.style.display = 'block';
+                if (pa) pa.style.display = 'none';
+            });
+            audio.addEventListener('error', function() {
+                var tname = document.getElementById('about-track-name');
+                if (tname && tname.textContent !== 'no track loaded') {
+                    tname.textContent = 'error loading track';
+                }
+            });
+
+            // Volume slider: save on change
+            var volEl = document.getElementById('about-volume');
+            if (volEl) {
+                volEl.addEventListener('input', function() {
+                    var a = document.getElementById('about-audio');
+                    if (a) a.volume = parseFloat(this.value);
+                    try { localStorage.setItem('about_volume', this.value); } catch(e) {}
+                });
+            }
+        }
+
+        // Fetch the site-wide track from the server and (re)load it if it changed.
+        // Called every time the About tab is opened, so it stays in sync without
+        // interrupting playback if the same track is already loaded.
+        async function aboutLoadGlobalTrack() {
+            var audio = document.getElementById('about-audio');
+            var tname = document.getElementById('about-track-name');
+            if (!audio) return;
+            try {
+                var res  = await localFetch('/api/about/music');
+                var data = await res.json();
+                var url  = (data && data.url)  ? data.url  : '';
+                var name = (data && data.name) ? data.name : '';
+
+                if (!url) {
+                    if (!audio.getAttribute('src') && tname) tname.textContent = 'no track loaded';
+                    return;
+                }
+
+                if (audio.getAttribute('src') === url) {
+                    // Already loaded — just sync the label and make sure it's playing
+                    if (tname) tname.textContent = name || url.split('/').pop().split('?')[0] || 'track';
+                    aboutTryAutoplay();
+                    return;
+                }
+
+                var volEl = document.getElementById('about-volume');
+                var ttime = document.getElementById('about-track-time');
+                var fill  = document.getElementById('about-progress-fill');
+                var urlEl = document.getElementById('about-music-url');
+
+                audio.pause();
+                audio.setAttribute('src', url);
+                audio.load();
+                audio.volume = volEl ? (parseFloat(volEl.value) || 0.7) : 0.7;
+                if (tname) tname.textContent = name || url.split('/').pop().split('?')[0] || 'track';
+                if (ttime) ttime.textContent = '0:00 / 0:00';
+                if (fill)  fill.style.width  = '0%';
+                if (urlEl) urlEl.value = url;
+
+                aboutTryAutoplay();
+            } catch (e) {
+                if (tname && !audio.getAttribute('src')) tname.textContent = 'no track loaded';
+            }
+        }
+
+        // Browsers block audio autoplay until the user has interacted with the page.
+        // Try to play immediately; if blocked, start on the visitor's first click/key press.
+        function aboutTryAutoplay() {
+            var audio = document.getElementById('about-audio');
+            if (!audio || !audio.paused || !audio.getAttribute('src')) return;
+            audio.play().catch(function() {
+                if (_aboutAutoplayBound) return;
+                _aboutAutoplayBound = true;
+                var resume = function() {
+                    var a = document.getElementById('about-audio');
+                    if (a && a.paused && a.getAttribute('src')) a.play().catch(function(){});
+                };
+                document.addEventListener('click', resume, { once: true });
+                document.addEventListener('keydown', resume, { once: true });
+            });
+        }
+
+        function aboutTogglePlay() {
+            var audio = document.getElementById('about-audio');
+            if (!audio) return;
+            // audio.src is empty string OR equals page URL when nothing loaded
+            var src = audio.getAttribute('src') || '';
+            if (!src || src === '' || src === window.location.href) {
+                // Flash the track name to hint user to load a track
+                var tname = document.getElementById('about-track-name');
+                if (tname) {
+                    var orig = tname.textContent;
+                    tname.style.color = '#cc3333';
+                    tname.textContent = currentUser && currentUser.isAdmin ? 'load a track first ↓' : 'no track loaded';
+                    setTimeout(function() {
+                        tname.style.color = '';
+                        tname.textContent = orig;
+                    }, 1500);
+                }
+                return;
+            }
+            if (audio.paused) {
+                audio.play().catch(function(err) {
+                    console.warn('Autoplay blocked:', err);
+                });
+            } else {
+                audio.pause();
+            }
+        }
+
+        // ── Track changing (admin only — sets the track for ALL visitors) ──────
+        async function aboutLoadLocalTrack(input) {
+            if (!currentUser || !currentUser.isAdmin) return;
+            if (!input.files || !input.files[0]) return;
+            var file  = input.files[0];
+            var label = document.getElementById('about-music-label');
+            if (label) label.textContent = 'Uploading…';
+
+            var fd = new FormData();
+            fd.append('track', file);
+
+            try {
+                var res  = await localFetch('/api/about/music/upload', { method: 'POST', body: fd });
+                var data = await res.json();
+                if (res.ok && data.url) {
+                    aboutSetTrack(data.url, data.name);
+                } else {
+                    alert(data.error || 'Ошибка загрузки.');
+                }
+            } catch (e) {
+                alert('Ошибка загрузки.');
+            } finally {
+                if (label) label.textContent = 'Upload audio file';
+                input.value = '';
+            }
+        }
+
+        async function aboutLoadUrl() {
+            if (!currentUser || !currentUser.isAdmin) return;
+            var el  = document.getElementById('about-music-url');
+            var url = el ? el.value.trim() : '';
+            if (!url) return;
+            var name = url.split('/').pop().split('?')[0] || 'track';
+
+            try {
+                var res  = await localFetch('/api/about/music', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ url: url, name: name })
+                });
+                var data = await res.json();
+                if (res.ok && data.url) {
+                    aboutSetTrack(data.url, data.name);
+                } else {
+                    alert(data.error || 'Ошибка сохранения.');
+                }
+            } catch (e) {
+                alert('Ошибка сохранения.');
+            }
+        }
+
+        async function aboutRemoveTrack() {
+            if (!currentUser || !currentUser.isAdmin) return;
+            if (!confirm('Remove the track for everyone?')) return;
+            try {
+                var res = await localFetch('/api/about/music', { method: 'DELETE' });
+                if (!res.ok) {
+                    var data = await res.json().catch(function(){ return {}; });
+                    alert(data.error || 'Ошибка удаления.');
+                    return;
+                }
+                var audio = document.getElementById('about-audio');
+                var tname = document.getElementById('about-track-name');
+                var ttime = document.getElementById('about-track-time');
+                var fill  = document.getElementById('about-progress-fill');
+                var urlEl = document.getElementById('about-music-url');
+                if (audio) { audio.pause(); audio.removeAttribute('src'); audio.load(); }
+                if (tname) tname.textContent = 'no track loaded';
+                if (ttime) ttime.textContent = '0:00 / 0:00';
+                if (fill)  fill.style.width  = '0%';
+                var _pi2 = document.getElementById('about-play-icon');
+                var _pa2 = document.getElementById('about-pause-icon');
+                if (_pi2) _pi2.style.display = 'block';
+                if (_pa2) _pa2.style.display = 'none';
+                if (urlEl) urlEl.value = '';
+            } catch (e) {
+                alert('Ошибка удаления.');
+            }
+        }
+
+        // Apply a (newly set) track to the player and play it — called right after
+        // an admin successfully sets a new global track (so it's a user gesture, autoplay is allowed).
+        function aboutSetTrack(url, name) {
+            var audio = document.getElementById('about-audio');
+            var volEl = document.getElementById('about-volume');
+            var tname = document.getElementById('about-track-name');
+            var ttime = document.getElementById('about-track-time');
+            var fill  = document.getElementById('about-progress-fill');
+            var urlEl = document.getElementById('about-music-url');
+            if (!audio) return;
+            audio.pause();
+            audio.setAttribute('src', url);
+            audio.load();
+            audio.volume = volEl ? (parseFloat(volEl.value) || 0.7) : 0.7;
+            if (tname) tname.textContent = name;
+            if (ttime) ttime.textContent = '0:00 / 0:00';
+            if (fill)  fill.style.width  = '0%';
+            var _pi3 = document.getElementById('about-play-icon');
+            var _pa3 = document.getElementById('about-pause-icon');
+            if (_pi3) _pi3.style.display = 'block';
+            if (_pa3) _pa3.style.display = 'none';
+            if (urlEl) urlEl.value = url;
+            audio.play().catch(function(err) {
+                console.warn('Playback blocked by browser autoplay policy. Click play to start.', err);
+                // Still show the track name — user can press play manually
+            });
+        }
+
+        function aboutFmtTime(s) {
+            if (!isFinite(s)) return '0:00';
+            var m = Math.floor(s / 60);
+            var sec = Math.floor(s % 60);
+            return m + ':' + (sec < 10 ? '0' : '') + sec;
+        }
+        function aboutSeek(e, bar) {
+            var audio = document.getElementById('about-audio');
+            if (!audio || !audio.duration) return;
+            var rect  = bar.getBoundingClientRect();
+            var ratio = Math.max(0, Math.min(1, (e.clientX - rect.left) / rect.width));
+            audio.currentTime = ratio * audio.duration;
+        }
+        async function aboutLoadText() {
+            try {
+                var res  = await localFetch('/api/about/text');
+                var data = await res.json();
+                var display = document.getElementById('about-text-display');
+                if (display && data.text) display.textContent = data.text;
+            } catch(e) {}
+        }
+        function aboutToggleEdit() {
+            if (!currentUser || !currentUser.isAdmin) return;
+            var display = document.getElementById('about-text-display');
+            var edit    = document.getElementById('about-text-edit');
+            var input   = document.getElementById('about-text-input');
+            var btn     = document.getElementById('about-edit-btn');
+            if (!display || !edit) return;
+            if (edit.classList.contains('hidden')) {
+                if (input) input.value = display.textContent;
+                edit.classList.remove('hidden');
+                display.classList.add('hidden');
+                if (btn) btn.textContent = 'cancel';
+            } else {
+                aboutCancelEdit();
+            }
+        }
+        async function aboutSaveText() {
+            if (!currentUser || !currentUser.isAdmin) return;
+            var val     = document.getElementById('about-text-input').value;
+            var display = document.getElementById('about-text-display');
+            var edit    = document.getElementById('about-text-edit');
+            var btn     = document.getElementById('about-edit-btn');
+            var saveBtn = edit ? edit.querySelector('button') : null;
+            if (saveBtn) { saveBtn.disabled = true; saveBtn.textContent = 'Saving...'; }
+            try {
+                var res  = await localFetch('/api/about/text', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ text: val })
+                });
+                var data = await res.json();
+                if (data.error) { alert(data.error); return; }
+                if (display) display.textContent = val;
+                if (edit)    edit.classList.add('hidden');
+                if (display) display.classList.remove('hidden');
+                if (btn)     btn.textContent = 'edit';
+            } catch(e) {
+                alert('Failed to save. Try again.');
+            } finally {
+                if (saveBtn) { saveBtn.disabled = false; saveBtn.textContent = 'Save'; }
+            }
+        }
+        function aboutCancelEdit() {
+            var display = document.getElementById('about-text-display');
+            var edit    = document.getElementById('about-text-edit');
+            var btn     = document.getElementById('about-edit-btn');
+            if (edit)    edit.classList.add('hidden');
+            if (display) display.classList.remove('hidden');
+            if (btn)     btn.textContent = 'edit';
+        }
+        // ── END ABOUT PAGE LOGIC ──────────────────────────────────────────────
+
+        function toggleAuthMode(m) {
+            document.getElementById('login-form').classList.toggle('hidden', m === 'register');
+            document.getElementById('register-form').classList.toggle('hidden', m === 'login');
+        }
+
+        function updateAuthStatus() {
+            const statusDiv = document.getElementById('auth-status');
+            const createBtn = document.getElementById('open-create-thread-btn');
+            const myProfileTab = document.getElementById('nav-my-profile');
+            document.getElementById('admin-options').classList.toggle('hidden', !currentUser || !currentUser.isAdmin);
+            const aboutTrackBox = document.getElementById('about-change-track-box');
+            if (aboutTrackBox) aboutTrackBox.classList.toggle('hidden', !currentUser || !currentUser.isAdmin);
+            const aboutEditBtn = document.getElementById('about-edit-btn');
+            if (aboutEditBtn) aboutEditBtn.classList.toggle('hidden', !currentUser || !currentUser.isAdmin);
+            updateBgAdminPanel();
+
+            if (currentUser) {
+                let av = `<img src="${currentUser.avatar_url || DEFAULT_AVATAR}" class="avatar-round" style="vertical-align:middle; margin-right:5px; cursor:pointer;" onclick="openProfile(${currentUser.id})" onerror="this.src='${DEFAULT_AVATAR}'">`;
+                statusDiv.innerHTML = `${av} <b style="color:${currentUser.role_color}; cursor:pointer;" onclick="openProfile(${currentUser.id})">${safeText(currentUser.username)}</b> <span class="user-role-badge" style="color:${currentUser.role_color}; border-color:${currentUser.role_color}">${safeText(currentUser.role_name)}</span> | <a href="#" onclick="logout()">Sign out</a>`;
+                createBtn.classList.remove('hidden'); myProfileTab.classList.remove('hidden');
+                document.getElementById('auth-section').classList.add('hidden');
+            } else {
+                statusDiv.innerHTML = `<a href="#" onclick="document.getElementById('auth-section').classList.remove('hidden')">Sign In / Register</a>`;
+                createBtn.classList.add('hidden'); myProfileTab.classList.add('hidden');
+                toggleCreateThreadModal(false);
+            }
+        }
+
+        function toggleCreateThreadModal(show) {
+            const overlay = document.getElementById('create-thread-modal-overlay');
+            if (!overlay) return;
+            if (show && !currentUser) {
+                document.getElementById('auth-section').classList.remove('hidden');
+                return;
+            }
+            overlay.classList.toggle('hidden', !show);
+        }
+
+        async function register() {
+            const username = document.getElementById('reg-username').value.trim();
+            const email = document.getElementById('reg-email').value.trim();
+            const password = document.getElementById('reg-password').value.trim();
+            const res = await localFetch('/api/register', { method: 'POST', headers: {'Content-Type': 'application/json'}, body: JSON.stringify({ username, email, password }) });
+            const data = await res.json();
+            if(data.error) return alert(data.error);
+            alert('Registered! You can now sign in.'); toggleAuthMode('login');
+        }
+
+        async function login() {
+            const loginInput = document.getElementById('login-username').value.trim();
+            const password = document.getElementById('login-password').value.trim();
+            const res = await localFetch('/api/login', { method: 'POST', headers: {'Content-Type': 'application/json'}, body: JSON.stringify({ loginInput, password }) });
+            const data = await res.json();
+            if(data.error) return alert(data.error);
+            currentUser = data;
+            checkAuthOnLoad();
+        }
+
+        async function logout() { 
+            await localFetch('/api/logout', { method: 'POST' });
+            currentUser = null; 
+            window.location.reload();
+        }
+        
+        function changeSort(sortType) {
+            currentSort = sortType;
+            currentPage = 1;
+            document.getElementById('tab-new').classList.toggle('active', sortType === 'new');
+            document.getElementById('tab-popular').classList.toggle('active', sortType === 'popular');
+            loadThreads();
+        }
+
+        async function loadThreads(page) {
+            if (page !== undefined) currentPage = page;
+            const searchQuery = document.getElementById('search-input').value.trim();
+            let url = `/api/threads?sort=${currentSort}&page=${currentPage}`;
+            if (searchQuery) url += `&search=${encodeURIComponent(searchQuery)}`;
+            if (activeTagFilter) url += `&tag=${encodeURIComponent(activeTagFilter)}`;
+
+            const listDiv = document.getElementById('threads-list');
+            listDiv.innerHTML = '<p style="color:#444; padding:10px;">Loading...</p>';
+
+            try {
+                const res = await localFetch(url);
+                if (!res.ok) throw new Error('Server error: ' + res.status);
+                const data = await res.json();
+                const threads = Array.isArray(data) ? data : (data.threads || []);
+                if (Array.isArray(data)) {
+                    const known = (currentPage - 1) * THREADS_PER_PAGE + data.length;
+                    totalThreads = data.length >= THREADS_PER_PAGE ? known + 1 : known;
+                } else {
+                    totalThreads = Number(data.total) || 0;
+                }
+                renderForumList(threads);
+                renderPagination();
+            } catch (e) {
+                console.error('loadThreads error:', e);
+                listDiv.innerHTML = '<p style="color:#884444; padding:10px;">Failed to load threads. Please try again.</p>';
+                document.getElementById('pagination').innerHTML = '';
+            }
+        }
+
+        function renderPagination() {
+            const box = document.getElementById('pagination');
+            box.innerHTML = '';
+            const totalPages = Math.ceil(totalThreads / THREADS_PER_PAGE);
+            if (totalPages <= 1) return;
+
+            const btn = (label, page, active, disabled) => {
+                const b = document.createElement('button');
+                b.textContent = label;
+                b.style.cssText = [
+                    'width:auto', 'padding:5px 11px', 'margin:0', 'font-size:0.85em',
+                    active   ? 'background:#660000;color:#fff;border-color:#880000;' : '',
+                    disabled ? 'opacity:0.3;cursor:default;pointer-events:none;'     : '',
+                ].join(';');
+                if (!disabled) b.onclick = () => { loadThreads(page); window.scrollTo(0, 0); };
+                return b;
+            };
+
+            const dots = () => {
+                const s = document.createElement('span');
+                s.textContent = '…';
+                s.style.cssText = 'color:#555;padding:0 4px;align-self:center;';
+                return s;
+            };
+
+            // Page counter label
+            const counter = document.createElement('span');
+            counter.textContent = `Page ${currentPage} of ${totalPages}`;
+            counter.style.cssText = 'font-size:0.8em;color:#555;align-self:center;margin-right:6px;white-space:nowrap;';
+            box.appendChild(counter);
+
+            box.appendChild(btn('«', 1, false, currentPage === 1));
+            box.appendChild(btn('‹', currentPage - 1, false, currentPage === 1));
+
+            let start = Math.max(1, currentPage - 2);
+            let end   = Math.min(totalPages, start + 4);
+            if (end - start < 4) start = Math.max(1, end - 4);
+
+            if (start > 1) {
+                box.appendChild(btn('1', 1, false, false));
+                if (start > 2) box.appendChild(dots());
+            }
+            for (let i = start; i <= end; i++) box.appendChild(btn(i, i, i === currentPage, false));
+            if (end < totalPages) {
+                if (end < totalPages - 1) box.appendChild(dots());
+                box.appendChild(btn(totalPages, totalPages, false, false));
+            }
+
+            box.appendChild(btn('›', currentPage + 1, false, currentPage === totalPages));
+            box.appendChild(btn('»', totalPages, false, currentPage === totalPages));
+        }
+
+        function debounceSearch() {
+            clearTimeout(searchTimeout);
+            searchTimeout = setTimeout(() => {
+                currentPage = 1;
+                loadThreads();
+            }, 300);
+        }
+
+        function renderForumList(list) {
+            const listDiv = document.getElementById('threads-list'); listDiv.innerHTML = '';
+            if(!list.length) { listDiv.innerHTML = '<p style="color: #444; padding: 10px;">Nothing found...</p>'; return; }
+
+            list.forEach(t => {
+                const div = document.createElement('div');
+                div.className = `block thread-card ${t.isPinned?'thread-pinned':''} ${t.isFeatured?'thread-featured':''}`;
+                div.onclick = () => openThread(t.id);
+
+                let pinBadge = t.isPinned ? '<span class="pin-icon"><svg width="12" height="14" viewBox="0 0 12 14" fill="none" xmlns="http://www.w3.org/2000/svg" style="display:inline-block;vertical-align:middle;margin-right:3px;margin-top:-2px"><path d="M6 0.5L1.5 5H0.5l2 2.5L2 13.5 6 11l4 2.5-.5-6L11.5 5h-1L6 0.5z" fill="#ff3333"/><line x1="6" y1="11" x2="6" y2="14" stroke="#cc0000" stroke-width="1.5" stroke-linecap="round"/></svg> [PINNED]</span> ' : '';
+                
+                let mediaSideHtml = '';
+                if(t.image_url) {
+                    const ext = t.image_url.split('.').pop().toLowerCase();
+                    if(['jpg','jpeg','png','gif','webp'].includes(ext)) {
+                        mediaSideHtml = `<div class="thread-media-side"><img src="${t.image_url}"></div>`;
+                    } else {
+                        mediaSideHtml = `<div class="thread-media-side" style="font-size:2em; padding:10px;">📄</div>`;
+                    }
+                }
+                
+                let avHtml = `<img src="${t.avatar_url || DEFAULT_AVATAR}" class="avatar-round" style="cursor:pointer;" onclick="event.stopPropagation(); openProfile(${t.author_id})" onerror="this.src='${DEFAULT_AVATAR}'">`;
+                let tagsHtml = '';
+                if (t.tags) {
+                    tagsHtml = `<div class="thread-tags-container">`;
+                    t.tags.split(',').forEach(tag => {
+                        if(tag.trim()) tagsHtml += `<span class="tag-badge" style="font-size:0.7em;" onclick="event.stopPropagation(); filterByTag('${safeText(tag.trim())}')">#${safeText(tag.trim())}</span>`;
+                    });
+                    tagsHtml += `</div>`;
+                }
+
+                let textCut = (t.text || '').substring(0, 140) + ((t.text || '').length > 140 ? '...' : '');
+                let adminThreadButtons = '';
+                if (currentUser?.isAdmin) {
+                    adminThreadButtons = `
+                        <button class="btn-delete" onclick="pinThread(${t.id}, event)">${t.isPinned ? 'Unpin' : 'Pin'}</button>
+                        <button class="btn-delete" onclick="featureThread(${t.id}, event)">${t.isFeatured ? 'Unfeature' : 'Feature'}</button>
+                        <button class="btn-delete" onclick="deleteThread(${t.id}, event)">Delete</button>
+                    `;
+                }
+
+                div.innerHTML = `
+                    <div class="thread-preview-layout">
+                        <div class="thread-text-side">
+                            <div class="post-meta">
+                                <div class="meta-left">
+                                    <div class="upvote-container" onclick="handleUpvote(${t.id}, event)">
+                                        <button class="upvote-btn">▲</button><span>${t.upvotes || 0}</span>
+                                    </div>
+                                    ${avHtml}
+                                    <div><a onclick="openProfileByName('${safeText(t.author)}', event)" style="color:${t.role_color || '#909090'}; font-weight:bold;">${safeText(t.author)}</a></div>
+                                    <span class="user-role-badge" style="color:${t.role_color}; border-color:${t.role_color}">${safeText(t.role_name || 'User')}</span>
+                                    <span style="color:#444; font-size:0.9em; margin-left:5px;">• ${safeText(t.created_at || '')}</span>
+                                    <div>| Replies: ${t.replyCount || 0}</div>
+                                </div>
+                                ${adminThreadButtons}
+                            </div>
+                            <h3 style="margin: 5px 0; color: #aa2828;">${pinBadge}${safeText(t.title)}</h3>
+                            <p style="color:#909090; font-size:0.95em; white-space:pre-wrap; margin:5px 0;">${safeText(textCut)}</p>
+                            ${tagsHtml}
+                        </div>
+                        ${mediaSideHtml}
+                    </div>
+                `;
+                listDiv.appendChild(div);
+            });
+        }
+
+        async function handleUpvote(threadId, event) {
+            event.stopPropagation(); if (!currentUser) return alert('You need to be logged in!');
+            await localFetch(`/api/threads/${threadId}/upvote`, { method: 'POST' });
+            loadThreads();
+        }
+
+        async function pinThread(threadId, event) {
+            if(event) event.stopPropagation();
+            const res = await localFetch(`/api/admin/threads/${threadId}/pin`, { method: 'POST' });
+            const data = await res.json();
+            if(data.error) return alert(data.error);
+            currentThreadId === threadId ? openThread(threadId) : loadThreads();
+        }
+
+        async function featureThread(threadId, event) {
+            if(event) event.stopPropagation();
+            const res = await localFetch(`/api/admin/threads/${threadId}/feature`, { method: 'POST' });
+            const data = await res.json();
+            if(data.error) return alert(data.error);
+            currentThreadId === threadId ? openThread(threadId) : loadThreads();
+        }
+
+        function switchMembersTab(tab) {
+            document.getElementById('members-tab').classList.toggle('hidden', tab !== 'members');
+            document.getElementById('roles-tab').classList.toggle('hidden', tab !== 'roles');
+            document.getElementById('members-tab-btn').classList.toggle('active', tab === 'members');
+            document.getElementById('roles-tab-btn').classList.toggle('active', tab === 'roles');
+            if (tab === 'members') { currentUsersPage = 1; loadUsers(); }
+            if (tab === 'roles') loadRoles();
+        }
+
+        async function loadUsers(page) {
+            if (page !== undefined) currentUsersPage = page;
+            const res = await localFetch(`/api/users?page=${currentUsersPage}`);
+            const data = await res.json();
+            const users = Array.isArray(data) ? data : (data.users || []);
+            totalUsers = data.total || users.length;
+            const box = document.getElementById('users-list');
+            box.innerHTML = '';
+            // Перезапускаем анимацию появления грида при каждой отрисовке:
+            // снимаем класс, форсируем reflow, ставим обратно — иначе CSS
+            // animation на контейнере сработала бы только один раз за
+            // всё время жизни страницы (при первой загрузке index.html).
+            box.classList.remove('fade-in');
+            void box.offsetWidth;
+            box.classList.add('fade-in');
+            users.forEach(u => {
+                let block = document.createElement('div');
+                block.className = 'user-card';
+                block.onclick = () => openProfile(u.id);
+                block.innerHTML = `
+                    <img src="${u.avatar_url || DEFAULT_AVATAR}" class="avatar-main" onerror="this.src='${DEFAULT_AVATAR}'">
+                    <b style="color:${u.role_color}">${safeText(u.username)}</b>
+                    <div style="margin-top:5px;">
+                        <span class="user-role-badge" style="color:${u.role_color}; border-color:${u.role_color}">${safeText(u.role_name)}</span>
+                        ${u.is_banned ? `<span class="user-role-badge" style="color:#ff3333; border-color:#ff3333">BANNED</span>` : ''}
+                    </div>
+                `;
+                box.appendChild(block);
+            });
+            renderUsersPagination();
+        }
+
+        function renderUsersPagination() {
+            let box = document.getElementById('users-pagination');
+            if (!box) {
+                box = document.createElement('div');
+                box.id = 'users-pagination';
+                box.style.cssText = 'display:flex; justify-content:center; align-items:center; gap:6px; margin-top:16px; flex-wrap:wrap;';
+                document.getElementById('members-tab').appendChild(box);
+            }
+            box.innerHTML = '';
+            const totalPages = Math.ceil(totalUsers / USERS_PER_PAGE);
+            if (totalPages <= 1) return;
+            const btn = (label, pg, active, disabled) => {
+                const b = document.createElement('button');
+                b.textContent = label;
+                b.style.cssText = `width:auto; padding:5px 11px; margin:0; font-size:0.85em; ${active ? 'background:#660000; color:#fff; border-color:#880000;' : ''} ${disabled ? 'opacity:0.3; cursor:default; pointer-events:none;' : ''}`;
+                if (!disabled) b.onclick = () => { loadUsers(pg); window.scrollTo(0,0); };
+                return b;
+            };
+            box.appendChild(btn('«', 1, false, currentUsersPage === 1));
+            box.appendChild(btn('‹', currentUsersPage - 1, false, currentUsersPage === 1));
+            let s = Math.max(1, currentUsersPage - 2), e = Math.min(totalPages, s + 4);
+            if (e - s < 4) s = Math.max(1, e - 4);
+            for (let i = s; i <= e; i++) box.appendChild(btn(i, i, i === currentUsersPage, false));
+            box.appendChild(btn('›', currentUsersPage + 1, false, currentUsersPage === totalPages));
+            box.appendChild(btn('»', totalPages, false, currentUsersPage === totalPages));
+        }
+
+        async function loadRoles() {
+            const res = await localFetch('/api/admin/hierarchy');
+            const items = await res.json();
+            const list = document.getElementById('roles-drag-list');
+            list.innerHTML = '';
+            items.forEach(item => {
+                list.appendChild(createRoleRow(item.role_name, item.role_color || '#909090', list));
+            });
+            // Always show USER pinned at bottom
+            list.appendChild(createRoleRow('USER', '#909090', list, true));
+        }
+
+        function createRoleRow(roleName, roleColor, container, locked) {
+            const div = document.createElement('div');
+            div.draggable = !locked;
+            div.dataset.role = roleName;
+            div.dataset.color = roleColor;
+            div.style.cssText = `display:flex;align-items:center;gap:12px;padding:10px 14px;background:${locked ? '#0a0a0a' : '#151515'};border:1px solid ${locked ? '#1a1a1a' : '#2d1212'};border-radius:4px;${locked ? '' : 'cursor:grab;'}user-select:none;`;
+
+            const colorDot = `<span style="width:14px;height:14px;border-radius:50%;background:${roleColor};flex-shrink:0;display:inline-block;border:1px solid #444;"></span>`;
+            const handle = locked ? `<span style="color:#333; font-size:1.1em;">🔒</span>` : `<span style="color:#555; font-size:1.1em; cursor:grab;">☰</span>`;
+            const colorPicker = locked ? '' : `<input type="color" value="${roleColor}" style="width:32px;height:28px;padding:1px;margin:0;flex-shrink:0;border:1px solid #333;background:#111;cursor:pointer;" oninput="updateRoleColor(this)" title="Change color">`;
+            const deleteBtn = locked ? '' : `<button onclick="removeRoleRow(this)" style="padding:2px 8px;font-size:0.8em;width:auto;margin:0;background:#2a0000;border:1px solid #551111;flex-shrink:0;">✕</button>`;
+
+            div.innerHTML = `
+                ${handle}
+                ${colorDot}
+                <span style="flex:1;color:${locked ? '#444' : roleColor};font-weight:bold;font-size:0.9em;text-transform:uppercase;" class="role-label">${safeText(roleName)}</span>
+                ${colorPicker}
+                ${deleteBtn}
+            `;
+
+            if (!locked) {
+                div.addEventListener('dragstart', e => {
+                    e.dataTransfer.effectAllowed = 'move';
+                    container._dragging = div;
+                    setTimeout(() => div.style.opacity = '0.4', 0);
+                });
+                div.addEventListener('dragend', () => {
+                    div.style.opacity = '1';
+                    container._dragging = null;
+                    // Keep USER locked at bottom
+                    const userRow = [...container.children].find(el => el.dataset.role === 'USER');
+                    if (userRow) container.appendChild(userRow);
+                });
+                div.addEventListener('dragover', e => {
+                    e.preventDefault();
+                    const dragging = container._dragging;
+                    if (!dragging || dragging === div || div.dataset.role === 'USER') return;
+                    const rect = div.getBoundingClientRect();
+                    if (e.clientY < rect.top + rect.height / 2) container.insertBefore(dragging, div);
+                    else container.insertBefore(dragging, div.nextSibling);
+                });
+            }
+            return div;
+        }
+
+        function updateRoleColor(picker) {
+            const row = picker.closest('[draggable]');
+            const color = picker.value;
+            row.dataset.color = color;
+            row.querySelector('.role-label').style.color = color;
+            row.querySelector('span[style*="border-radius:50%"]').style.background = color;
+        }
+
+        function removeRoleRow(btn) { btn.closest('[draggable]').remove(); }
+
+        function addNewRole() {
+            const nameInput = document.getElementById('new-role-name');
+            const colorInput = document.getElementById('new-role-color');
+            const name = nameInput.value.trim();
+            if (!name) return alert('Enter a role name');
+            if (name.toUpperCase() === 'USER') return alert('USER is reserved');
+            const list = document.getElementById('roles-drag-list');
+            const exists = [...list.querySelectorAll('[draggable]')].some(el => el.dataset.role.toLowerCase() === name.toLowerCase());
+            if (exists) return alert('This role already exists in the list');
+            // Insert before the locked USER row
+            const userRow = [...list.children].find(el => el.dataset.role === 'USER');
+            const newRow = createRoleRow(name, colorInput.value, list, false);
+            if (userRow) list.insertBefore(newRow, userRow);
+            else list.appendChild(newRow);
+            nameInput.value = '';
+            colorInput.value = '#909090';
+        }
+
+        async function saveHierarchy() {
+            const list = document.getElementById('roles-drag-list');
+            const items = [...list.querySelectorAll('[data-role]')]
+                .filter(el => el.dataset.role !== 'USER')
+                .map((el, i) => ({ role_name: el.dataset.role, role_color: el.dataset.color || '#909090', sort_order: i + 1 }));
+            const res = await localFetch('/api/admin/hierarchy', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ hierarchy: items })
+            });
+            const data = await res.json();
+            if (data.error) return alert(data.error);
+            alert('Roles saved!');
+        }
+
+        function addToHierarchy(roleName) {
+            // legacy helper — no-op now, roles managed in Roles tab
+        }
+
+        async function openProfile(id) { 
+            viewedProfileId = id; 
+            const res = await localFetch(`/api/users/${id}`); 
+            const user = await res.json(); 
+            navigate('/profile/' + encodeURIComponent(user.username));
+            renderProfileCard(user); 
+            loadProfileComments(id);
+        }
+
+        async function openProfileByName(username, event) { 
+            if(event) event.stopPropagation(); 
+            const res = await localFetch(`/api/users/by-username/${username}`); 
+            if(!res.ok) return alert('User not found');
+            const user = await res.json(); 
+            viewedProfileId = user.id;
+            navigate('/profile/' + encodeURIComponent(user.username));
+            renderProfileCard(user); 
+            loadProfileComments(user.id);
+        }
+
+        function openMyProfile() { if(currentUser) openProfile(currentUser.id); }
+
+        function renderProfileCard(user) {
+            showSection('profile'); const viewBox = document.getElementById('profile-view-box');
+            
+            // Кнопка блокировки (для администраторов)
+            let banButtonHtml = '';
+            let prefixAdminHtml = '';
+            const prefixColor = /^#[0-9a-fA-F]{6}$/.test(user.role_color || '') ? user.role_color : '#909090';
+            if (currentUser && currentUser.isAdmin && currentUser.id !== user.id) {
+                if (user.is_banned) {
+                    banButtonHtml = `<button class="btn-ban" style="background:#006622; border-color:#004411; color:#fff;" onclick="handleBan(${user.id}, 'unban')">Unban User</button>`;
+                } else {
+                    banButtonHtml = `<button class="btn-ban" onclick="handleBan(${user.id}, 'ban')">Ban User</button>`;
+                }
+                banButtonHtml += ` <button class="btn-ban" style="background:#3a0000; border-color:#660000; color:#ff6666;" onclick="handleDeleteUser(${user.id}, '${safeText(user.username)}')">🗑 Delete Account</button>`;
+            }
+
+            // DM button — show for any logged-in user viewing another user's profile
+            let dmButtonHtml = '';
+            if (currentUser && currentUser.username !== user.username && !user.is_banned) {
+                dmButtonHtml = `<button onclick="openDMWith('${safeText(user.username)}')" style="width:auto; padding:5px 14px; font-size:0.85em; margin-top:6px;">💬 Send Message</button>`;
+            }
+            if (currentUser && currentUser.isAdmin) {
+                prefixAdminHtml = `
+                    <div class="block" style="margin-top:10px;">
+                        <h3>User Role Badge</h3>
+                        <div style="display:flex; gap:8px; align-items:center; flex-wrap:wrap;">
+                            <input type="text" id="prefix-role-name-${user.id}" value="${safeText(user.role_name || 'User')}" maxlength="32" placeholder="Role name" style="max-width:220px; margin:0;">
+                            <input type="color" id="prefix-role-color-${user.id}" value="${prefixColor}" style="width:48px; height:38px; padding:2px; margin:0;">
+                            <button onclick="handlePrefixUpdate(${user.id})" style="width:auto; margin:0;">Save Role</button>
+                        </div>
+                    </div>
+                `;
+            }
+
+            viewBox.innerHTML = `
+                <div class="profile-banner" style="background-image: url('${user.banner_url || DEFAULT_BANNER}')"></div>
+                <div class="profile-header-box">
+                    <img src="${user.avatar_url || DEFAULT_AVATAR}" class="avatar-main" onerror="this.src='${DEFAULT_AVATAR}'">
+                    <div style="flex:1; min-width:0; display:flex; justify-content:space-between; align-items:flex-end; gap:10px; flex-wrap:wrap;">
+                        <div>
+                            <h2 style="margin:0 0 6px 0; color:${user.role_color};">
+                                ${safeText(user.username)} 
+                                <span class="user-role-badge" style="color:${user.role_color}; border-color:${user.role_color}">${safeText(user.role_name)}</span>
+                                ${user.is_banned ? `<span class="user-role-badge" style="color:#ff3333; border-color:#ff3333">BANNED</span>` : ''}
+                            </h2>
+                            <div style="display:flex; gap:6px; flex-wrap:wrap; align-items:center;">
+                                ${banButtonHtml}
+                                ${dmButtonHtml}
+                            </div>
+                        </div>
+                        <div style="text-align:right; white-space:nowrap; flex-shrink:0; padding-bottom:2px; color:#888; line-height:1.6;">
+                            <div style="font-size:0.85em;">UID <span style="color:#bbb; font-family:monospace; font-size:1.15em;">${user.id}</span> &nbsp;·&nbsp; Joined <span style="color:#bbb;">${user.registered_at ? user.registered_at.slice(0,10) : '—'}</span></div>
+                        </div>
+                    </div>
+                </div>
+                ${prefixAdminHtml}
+                <div class="block"><h3>About:</h3><div class="bio-display">${safeText(user.bio || 'This user has not written anything about themselves yet.')}</div></div>
+            `;
+            
+            const isMe = currentUser && currentUser.id === user.id;
+            document.getElementById('profile-edit-box').classList.toggle('hidden', !isMe);
+            if(isMe) document.getElementById('edit-bio').value = user.bio || '';
+            
+            // Отображение формы отправки комментариев, если залогинен и профиль не забанен
+            document.getElementById('profile-comment-form-container').classList.toggle('hidden', !currentUser || user.is_banned === 1);
+        }
+
+        // Функция обработки бана/разбана
+        async function handleBan(userId, action) {
+            if(!confirm(`Are you sure you want to ${action === 'ban' ? 'ban' : 'unban'} this user?`)) return;
+            const res = await localFetch('/api/admin/ban', {
+                method: 'POST',
+                headers: {'Content-Type': 'application/json'},
+                body: JSON.stringify({ userId, action })
+            });
+            const data = await res.json();
+            if(data.error) return alert(data.error);
+            alert(data.message);
+            openProfile(userId);
+        }
+
+        async function handleDeleteUser(userId, username) {
+            if(!confirm(`Permanently delete account "${username}"?\n\nThis will remove the user and all their data. This cannot be undone.`)) return;
+            const res = await localFetch(`/api/admin/users/${userId}/delete`, {
+                method: 'DELETE',
+                headers: {'Content-Type': 'application/json'}
+            });
+            const data = await res.json();
+            if(data.error) return alert(data.error);
+            alert(`Account "${username}" deleted.`);
+            showSection('users');
+        }
+
+        async function handlePrefixUpdate(userId) {
+            const roleNameInput = document.getElementById(`prefix-role-name-${userId}`);
+            const roleColorInput = document.getElementById(`prefix-role-color-${userId}`);
+            const role_name = roleNameInput.value.trim() || 'User';
+            const role_color = roleColorInput.value;
+
+            const res = await localFetch('/api/admin/prefix', {
+                method: 'POST',
+                headers: {'Content-Type': 'application/json'},
+                body: JSON.stringify({ userId, role_name, role_color })
+            });
+            const data = await res.json();
+            if(data.error) return alert(data.error);
+
+            if(currentUser && currentUser.id === userId) {
+                currentUser = data.user;
+                updateAuthStatus();
+            }
+            renderProfileCard(data.user);
+            loadProfileComments(userId);
+        }
+
+        // Загрузка комментариев стены
+        async function loadProfileComments(profileId) {
+            const res = await localFetch(`/api/users/${profileId}/comments`);
+            const comments = await res.json();
+            const listDiv = document.getElementById('profile-comments-list');
+            listDiv.innerHTML = '';
+            
+            if(!comments.length) {
+                listDiv.innerHTML = '<p style="color:#444;">No messages on this wall yet.</p>';
+                return;
+            }
+
+            comments.forEach(c => {
+                const item = document.createElement('div');
+                item.className = 'comment-item';
+                
+                // Кнопка удаления комментария (Доступна автору, админу, или владельцу профиля)
+                let deleteBtn = '';
+                if(currentUser && (currentUser.isAdmin || currentUser.username === c.author || currentUser.id === viewedProfileId)) {
+                    deleteBtn = `<button class="btn-delete" style="padding:1px 5px; font-size:0.75em;" onclick="deleteProfileComment(${c.id})">Delete</button>`;
+                }
+
+                item.innerHTML = `
+                    <div class="post-meta" style="margin-bottom:2px;">
+                        <div class="meta-left">
+                            <img src="${c.avatar_url || DEFAULT_AVATAR}" class="avatar-round" style="width:20px!important; height:20px!important; min-width:20px!important; min-height:20px!important;" onerror="this.src='${DEFAULT_AVATAR}'">
+                            <a onclick="openProfileByName('${safeText(c.author)}')" style="color:${c.role_color || '#909090'}; font-weight:bold;">${safeText(c.author)}</a>
+                            <span style="color:#444; font-size:0.85em;">• ${safeText(c.created_at)}</span>
+                        </div>
+                        ${deleteBtn}
+                    </div>
+                    <p style="margin:2px 0 0 0; font-size:0.9em; color:#ccc; white-space:pre-wrap;">${linkify(safeText(c.text))}</p>
+                `;
+                listDiv.appendChild(item);
+            });
+        }
+
+        // Отправка комментария на стену
+        async function sendProfileComment() {
+            const textInput = document.getElementById('profile-comment-input');
+            const text = textInput.value.trim();
+            if(!text) return alert('Please enter a message');
+            
+            const res = await localFetch(`/api/users/${viewedProfileId}/comments`, {
+                method: 'POST',
+                headers: {'Content-Type': 'application/json'},
+                body: JSON.stringify({ text })
+            });
+            const data = await res.json();
+            if(data.error) return alert(data.error);
+            
+            textInput.value = '';
+            loadProfileComments(viewedProfileId);
+        }
+
+        // Удаление комментария со стены
+        async function deleteProfileComment(commentId) {
+            if(!confirm('Delete this comment?')) return;
+            const res = await localFetch(`/api/profile-comments/${commentId}`, { method: 'DELETE' });
+            const data = await res.json();
+            if(data.error) return alert(data.error);
+            loadProfileComments(viewedProfileId);
+        }
+
+        async function saveProfile() {
+            const formData = new FormData();
+            const avatarFile = document.getElementById('edit-avatar').files[0];
+            const bannerFile = document.getElementById('edit-banner').files[0];
+            formData.append('bio', document.getElementById('edit-bio').value.trim());
+            if(avatarFile) formData.append('avatar', avatarFile); if(bannerFile) formData.append('banner', bannerFile);
+
+            const res = await localFetch(`/api/users/${currentUser.id}/update`, { method: 'POST', body: formData });
+            const data = await res.json();
+            currentUser = data;
+            alert('Profile updated!'); openProfile(currentUser.id); updateAuthStatus();
+        }
+
+        async function createThread() {
+            const title = document.getElementById('thread-title').value.trim();
+            const text = document.getElementById('thread-text').value.trim();
+            const tags = document.getElementById('thread-tags').value.trim();
+            const fileInput = document.getElementById('thread-image');
+            const isPinned = document.getElementById('thread-is-pinned').checked;
+            const isFeatured = document.getElementById('thread-is-featured').checked;
+
+            if(!title || !text) return alert('Please enter a title and text for your thread!');
+            if(!currentUser) return alert('You must be logged in!');
+
+            const formData = new FormData();
+            formData.append('title', title); 
+            formData.append('text', text); 
+            formData.append('tags', tags);
+            formData.append('isPinned', isPinned ? 1 : 0);
+            formData.append('isFeatured', isFeatured ? 1 : 0);
+            if (fileInput.files) {
+                for (const f of fileInput.files) formData.append('images', f);
+            }
+
+            const res = await localFetch('/api/threads', { method: 'POST', body: formData });
+            const data = await res.json();
+            if(data.error) return alert(data.error);
+            
+            document.getElementById('thread-title').value = ''; document.getElementById('thread-text').value = ''; document.getElementById('thread-tags').value = '';
+            document.getElementById('thread-image').value = ''; updateMultiFileLabel('thread-image', 'thread-image-label');
+            document.getElementById('thread-is-pinned').checked = false;
+            document.getElementById('thread-is-featured').checked = false;
+            toggleCreateThreadModal(false);
+            showSection('forum');
+        }
+
+        async function openThread(id, replyPage) {
+            currentThreadId = id;
+            if (replyPage !== undefined) currentReplyPage = replyPage; else currentReplyPage = 1;
+            navigate('/thread/' + id);
+            showSection('thread');
+            const res = await localFetch(`/api/threads/${id}?replyPage=${currentReplyPage}`); const data = await res.json();
+            if (!res.ok || data.error || !data.thread) {
+                const threadBox = document.getElementById('opened-thread');
+                const replyBlock = document.getElementById('reply-block');
+                threadBox.innerHTML = `<div class="block" style="text-align:center;padding:40px 20px;"><p style="color:#882222;font-size:1.2em;margin-bottom:16px;">⚠ Тред не найден</p><p style="color:#555;margin-bottom:20px;">Этот тред был удалён или не существует.</p><button onclick="showSection('forum')" style="width:auto;padding:8px 22px;">← Вернуться на форум</button></div>`;
+                replyBlock.innerHTML = '';
+                return;
+            }
+            totalReplies = data.totalReplies || 0;
+            const t = data.thread; const threadBox = document.getElementById('opened-thread');
+            let pinBadge = t.isPinned ? '<span class="pin-icon"><svg width="12" height="14" viewBox="0 0 12 14" fill="none" xmlns="http://www.w3.org/2000/svg" style="display:inline-block;vertical-align:middle;margin-right:3px;margin-top:-2px"><path d="M6 0.5L1.5 5H0.5l2 2.5L2 13.5 6 11l4 2.5-.5-6L11.5 5h-1L6 0.5z" fill="#ff3333"/><line x1="6" y1="11" x2="6" y2="14" stroke="#cc0000" stroke-width="1.5" stroke-linecap="round"/></svg> [PINNED]</span> ' : '';
+            let adminThreadButtons = '';
+            if (currentUser?.isAdmin) {
+                adminThreadButtons = `
+                    <button class="btn-delete" onclick="pinThread(${t.id}, event)">${t.isPinned ? 'Unpin' : 'Pin'}</button>
+                    <button class="btn-delete" onclick="featureThread(${t.id}, event)">${t.isFeatured ? 'Unfeature' : 'Feature'}</button>
+                    <button class="btn-delete" onclick="deleteThread(${t.id}, event)">Delete</button>
+                `;
+            }
+
+            threadBox.innerHTML = `
+                <div class="block ${t.isFeatured?'thread-featured':''}">
+                    <div class="post-meta">
+                        <div class="meta-left">
+                            <img src="${t.avatar_url || DEFAULT_AVATAR}" class="avatar-round" style="cursor:pointer;" onclick="openProfile(${t.author_id})" onerror="this.src='${DEFAULT_AVATAR}'">
+                            <a onclick="openProfileByName('${safeText(t.author)}')" style="color:${t.role_color || '#909090'}; font-weight:bold;">${safeText(t.author)}</a>
+                            <span class="user-role-badge" style="color:${t.role_color || '#909090'}; border-color:${t.role_color || '#909090'}">${safeText(t.role_name || 'User')}</span>
+                            <span style="color:#444;">• ${safeText(t.created_at || '')}</span>
+                        </div>
+                        ${adminThreadButtons}
+                    </div>
+                    <h2 style="color: #aa2828; margin:10px 0;">${pinBadge}${safeText(t.title)}</h2>
+                    <p style="white-space:pre-wrap; color:#dcdcdc; line-height:1.5;">${linkify(safeText(t.text))}</p>
+                    ${renderAttachedFile(t)}
+                </div>
+            `;
+
+            const replyBlock = document.getElementById('reply-block'); replyBlock.innerHTML = '';
+            data.replies.forEach(r => {
+                const rDiv = document.createElement('div'); rDiv.className = 'post';
+                rDiv.innerHTML = `
+                    <div class="post-meta">
+                        <div class="meta-left">
+                            <img src="${r.avatar_url || DEFAULT_AVATAR}" class="avatar-round" style="cursor:pointer;" onclick="openProfile(${r.author_id})" onerror="this.src='${DEFAULT_AVATAR}'">
+                            <a onclick="openProfileByName('${safeText(r.author)}')" style="color:${r.role_color || '#909090'}; font-weight:bold;">${safeText(r.author)}</a>
+                            <span class="user-role-badge" style="color:${r.role_color || '#909090'}; border-color:${r.role_color || '#909090'}">${safeText(r.role_name || 'User')}</span>
+                            <span style="color:#444;">• ${safeText(r.created_at || '')}</span>
+                        </div>
+                        ${currentUser?.isAdmin ? `<button class="btn-delete" onclick="deleteReply(${r.id})">Delete</button>` : ''}
+                    </div>
+                    <p style="white-space:pre-wrap; color:#ccc; margin-top:10px;">${linkify(safeText(r.text))}</p>
+                    ${renderAttachedFile(r)}
+                `;
+                replyBlock.appendChild(rDiv);
+            });
+
+            const totalReplyPages = Math.ceil(totalReplies / REPLIES_PER_PAGE);
+            if (totalReplyPages > 1) {
+                const pagDiv = document.createElement('div');
+                pagDiv.style.cssText = 'display:flex; justify-content:center; align-items:center; gap:6px; margin:12px 0; flex-wrap:wrap;';
+                const rpBtn = (label, pg, active, disabled) => {
+                    const b = document.createElement('button');
+                    b.textContent = label;
+                    b.style.cssText = `width:auto; padding:5px 11px; margin:0; font-size:0.85em; ${active ? 'background:#660000; color:#fff; border-color:#880000;' : ''} ${disabled ? 'opacity:0.3; cursor:default; pointer-events:none;' : ''}`;
+                    if (!disabled) b.onclick = () => { openThread(currentThreadId, pg); window.scrollTo(0, 0); };
+                    return b;
+                };
+                pagDiv.appendChild(rpBtn('‹', currentReplyPage - 1, false, currentReplyPage === 1));
+                let rs = Math.max(1, currentReplyPage - 2), re = Math.min(totalReplyPages, rs + 4);
+                if (re - rs < 4) rs = Math.max(1, re - 4);
+                for (let i = rs; i <= re; i++) pagDiv.appendChild(rpBtn(i, i, i === currentReplyPage, false));
+                pagDiv.appendChild(rpBtn('›', currentReplyPage + 1, false, currentReplyPage === totalReplyPages));
+                replyBlock.appendChild(pagDiv);
+            }
+
+            if(currentUser) {
+                const formDiv = document.createElement('div'); formDiv.className = 'block';
+                formDiv.innerHTML = `
+                    <h3>Leave a Reply</h3>
+                    <textarea id="reply-text" placeholder="Write your reply..."></textarea>
+                    <div class="file-upload-wrapper">
+                        <label for="reply-image" id="reply-image-label" class="file-upload-btn">Attach files (up to 5, max 5 MB each)</label>
+                        <input type="file" id="reply-image" class="file-input-hidden" multiple accept="image/jpeg,image/png,image/gif,image/webp,audio/*,video/*" onchange="updateMultiFileLabel('reply-image', 'reply-image-label')">
+                    </div>
+                    <button onclick="sendReply()">Post Reply</button>
+                `;
+                replyBlock.appendChild(formDiv);
+            }
+        }
+
+        async function sendReply() {
+            const text = document.getElementById('reply-text').value.trim();
+            const fileInput = document.getElementById('reply-image');
+            if(!text && (!fileInput || !fileInput.files || fileInput.files.length === 0)) return alert('Please enter reply text or attach a file');
+
+            const formData = new FormData();
+            formData.append('threadId', currentThreadId); 
+            formData.append('text', text);
+            if (fileInput && fileInput.files) {
+                for (const f of fileInput.files) formData.append('images', f);
+            }
+
+            const res = await localFetch(`/api/threads/${currentThreadId}/replies`, { method: 'POST', body: formData });
+            const data = await res.json();
+            if(data.error) return alert(data.error);
+            const lastRPage = Math.ceil((totalReplies + 1) / REPLIES_PER_PAGE) || 1;
+            openThread(currentThreadId, lastRPage);
+        }
+
+        async function deleteThread(id, event) { if(event) event.stopPropagation(); if(!confirm('Delete this thread?')) return; const res = await localFetch(`/api/threads/${id}`, { method: 'DELETE' }); const data = await res.json(); if(data.error) return alert(data.error); showSection('forum'); }
+        async function deleteReply(id) { if(!confirm('Delete this reply?')) return; const res = await localFetch(`/api/replies/${id}`, { method: 'DELETE' }); const data = await res.json(); if(data.error) return alert(data.error); openThread(currentThreadId); }
+        
+        function filterByTag(tagName) { 
+            activeTagFilter = tagName.toLowerCase();
+            currentPage = 1;
+            document.getElementById('active-tag-filter-display').innerText = `Filter: #${tagName} [Clear]`;
+            loadThreads(); 
+        }
+        function clearTagFilter() { 
+            activeTagFilter = null;
+            currentPage = 1;
+            document.getElementById('active-tag-filter-display').innerText = '';
+            loadThreads(); 
+        }
+
+        async function loadSidebarWidgets() {
+            try {
+                // ОПТИМИЗАЦИЯ: раньше здесь было 6 ПОСЛЕДОВАТЕЛЬНЫХ await fetch() —
+                // каждый ждал ответа предыдущего, что давало 6+ сетевых round-trip
+                // подряд при каждой загрузке страницы и каждые 30 секунд.
+                // Теперь один запрос к /api/sidebar/all, который сервер собирает
+                // параллельно (Promise.all) и кэширует на 15 секунд.
+                const rAll = await localFetch('/api/sidebar/all');
+                const all = await rAll.json();
+                const dStats    = all.stats    || {};
+                const dTrending = all.trending || [];
+                const dActivity = all.activity || [];
+                const dStaff    = all.staff    || [];
+                const dTags     = all.tags     || [];
+                const dTop      = all.topUsers || [];
+
+                document.getElementById('stat-users-count').innerText = dStats.userCount;
+                document.getElementById('stat-threads-count').innerText = dStats.threadCount;
+                document.getElementById('stat-replies-count').innerText = dStats.replyCount;
+                
+                const onlineBox = document.getElementById('widget-online-list'); onlineBox.innerHTML = '';
+                if (dStats.onlineUsers && dStats.onlineUsers.length > 0) {
+                    dStats.onlineUsers.forEach(u => {
+                        onlineBox.innerHTML += `<span class="online-user-tag"><span class="online-dot"></span><a onclick="openProfile(${u.id})" style="color:${u.role_color}; font-weight:bold; font-size:0.95em;">${safeText(u.username)}</a></span>`;
+                    });
+                } else onlineBox.innerHTML = `<span style="font-size:0.85em; color:#444;">No one online</span>`;
+
+                const newUsersBox = document.getElementById('widget-new-users'); newUsersBox.innerHTML = '';
+                if(dStats.newestUsers) {
+                    dStats.newestUsers.forEach(u => { newUsersBox.innerHTML += `<img src="${u.avatar_url || DEFAULT_AVATAR}" title="${safeText(u.username)}" onclick="openProfile(${u.id})" onerror="this.src='${DEFAULT_AVATAR}'">`; });
+                }
+
+                const trendingBox = document.getElementById('widget-trending-list'); trendingBox.innerHTML = '';
+                dTrending.forEach(t => { trendingBox.innerHTML += `<div class="sidebar-list-item"><a class="sidebar-list-title" onclick="openThread(${t.id})"># ${safeText(t.title)}</a><span style="color:#555; font-size:0.85em;">Replies: ${t.replyCount}</span></div>`; });
+
+                const activityBox = document.getElementById('widget-activity-stream'); activityBox.innerHTML = '';
+                dActivity.forEach(a => {
+                    let textCut = a.text.substring(0, 45) + (a.text.length > 45 ? '...' : '');
+                    activityBox.innerHTML += `<div class="activity-item"><img src="${a.avatar_url || DEFAULT_AVATAR}" style="cursor:pointer;" onclick="openProfileByName('${safeText(a.author)}')" onerror="this.src='${DEFAULT_AVATAR}'"><div><b style="color:${a.role_color}; cursor:pointer;" onclick="openProfileByName('${safeText(a.author)}')" >${safeText(a.author)}</b> <span style="color:#666;">in</span> <a onclick="openThread(${a.topicId})" style="font-weight:bold; color:#882222;">${safeText(a.topicTitle.substring(0,25))}</a><div style="color:#888; font-size:0.95em; margin-top:2px; font-style:italic;">"${safeText(textCut)}"</div></div></div>`;
+                });
+
+                const staffBox = document.getElementById('widget-staff-list'); staffBox.innerHTML = '';
+                dStaff.forEach(s => { staffBox.innerHTML += `<div style="display:flex; align-items:center; gap:8px; margin-bottom:6px; font-size:0.9em;"><img src="${s.avatar_url || DEFAULT_AVATAR}" class="avatar-round" style="width:24px; height:24px; cursor:pointer;" onclick="openProfile(${s.id})" onerror="this.src='${DEFAULT_AVATAR}'"><a onclick="openProfile(${s.id})" style="color:${s.role_color}; font-weight:bold;">${safeText(s.username)}</a><span style="font-size:0.75em; color:#555;">(${safeText(s.role_name)})</span></div>`; });
+
+                // ── Popular Tags widget ──────────────────────────────────────
+                try {
+                    const tagsBox = document.getElementById('widget-tags-cloud');
+                    if (tagsBox) {
+                        if (Array.isArray(dTags) && dTags.length) {
+                            tagsBox.innerHTML = '';
+                            dTags.forEach(t => {
+                                const tag = t.tag || t.name || t;
+                                const count = t.count || '';
+                                tagsBox.innerHTML += `<span class="tag-badge" onclick="filterByTag('${safeText(tag)}')">#${safeText(tag)}${count ? ` <span style="opacity:0.5;font-size:0.9em;">(${count})</span>` : ''}</span>`;
+                            });
+                        } else { tagsBox.innerHTML = '<span style="font-size:0.82em;color:#444;">No tags yet</span>'; }
+                    }
+                } catch(e) {}
+
+                // ── Top Posters widget ───────────────────────────────────────
+                try {
+                    const topBox = document.getElementById('widget-top-posters');
+                    if (topBox) {
+                        topBox.innerHTML = '';
+                        if (Array.isArray(dTop) && dTop.length) {
+                            dTop.slice(0, 5).forEach((u, i) => {
+                                topBox.innerHTML += `<div style="display:flex;align-items:center;gap:8px;padding:5px 0;border-bottom:1px dashed #1a0a0a;font-size:0.85em;"><span style="color:#4a1414;font-weight:bold;min-width:16px;text-align:center;">${i+1}</span><img src="${u.avatar_url || DEFAULT_AVATAR}" class="avatar-round" style="width:22px;height:22px;cursor:pointer;" onclick="openProfile(${u.id})" onerror="this.src='${DEFAULT_AVATAR}'"><a onclick="openProfile(${u.id})" style="color:${u.role_color||'#909090'};font-weight:bold;flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">${safeText(u.username)}</a><span style="color:#555;font-size:0.85em;flex-shrink:0;">${u.post_count||u.postCount||0}</span></div>`;
+                            });
+                        } else { topBox.innerHTML = '<span style="font-size:0.82em;color:#444;">No data yet</span>'; }
+                    }
+                } catch(e) {}
+
+            } catch (e) { console.error(e); }
+        }
+
+
+        // ═══════════════════════════════════════════════════════════════════════
+        // ─── HASH ROUTER ────────────────────────────────────────────────────
+        // ═══════════════════════════════════════════════════════════════════════
+
+        async function routeFromPath() {
+            const path = window.location.pathname;
+            const parts = path.replace(/^\//, '').split('/');
+            const page  = parts[0];
+            const param = parts.slice(1).map(decodeURIComponent).join('/');
+
+            if (page === '' || page === 'forum') {
+                showSection('forum');
+            } else if (page === 'thread' && param) {
+                await openThread(parseInt(param));
+            } else if (page === 'members') {
+                showSection('users');
+            } else if (page === 'profile' && param) {
+                await openProfileByName(param);
+            } else if (page === 'chat') {
+                showSection('chat');
+            } else if (page === 'dm' && param) {
+                showSection('dm');
+                setTimeout(() => dmOpenConversation(param), 150);
+            } else if (page === 'dm') {
+                showSection('dm');
+            } else if (page === 'about') {
+                showSection('about');
+            } else {
+                showSection('forum');
+            }
+        }
+
+        // Back/forward browser buttons
+        window.addEventListener('popstate', () => routeFromPath());
+
+        window.addEventListener('DOMContentLoaded', () => {
+            checkAuthOnLoad();
+            // ОПТИМИЗАЦИЯ: было 30 секунд для всех пользователей всегда.
+            // Теперь 60 секунд + не обновляем, если вкладка не активна
+            // (document.hidden) — экономит запросы к Turso от неактивных вкладок.
+            setInterval(() => { if (!document.hidden) loadSidebarWidgets(); }, 60000);
+        });
+
+        // ═══════════════════════════════════════════════════════════════════════
+        // ─── CHAT & PRIVATE MESSAGES JAVASCRIPT ─────────────────────────────
+        // ═══════════════════════════════════════════════════════════════════════
+
+        let chatSSE = null;
+        let dmSSE = null;
+        let audioCtx = null;
+
+        // ─── Notification sound ────────────────────────────────────────────────
+        // AudioContext must be created/resumed inside a user gesture.
+        // We prime it on the first click anywhere, then it stays unlocked.
+        function primeAudio() {
+            try {
+                if (!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+                if (audioCtx.state === 'suspended') audioCtx.resume();
+            } catch (_) {}
+        }
+        document.addEventListener('click', primeAudio, { once: false });
+        document.addEventListener('keydown', primeAudio, { once: false });
+
+        function playNotifSound() {
+            try {
+                if (!audioCtx || audioCtx.state !== 'running') return;
+                const ctx = audioCtx;
+                const t = ctx.currentTime;
+                // Two-tone pager beep: 660 Hz then 880 Hz
+                [660, 880].forEach((freq, i) => {
+                    const osc  = ctx.createOscillator();
+                    const gain = ctx.createGain();
+                    osc.connect(gain);
+                    gain.connect(ctx.destination);
+                    osc.type = 'sine';
+                    osc.frequency.value = freq;
+                    gain.gain.setValueAtTime(0.001, t + i * 0.13);
+                    gain.gain.linearRampToValueAtTime(0.2, t + i * 0.13 + 0.012);
+                    gain.gain.exponentialRampToValueAtTime(0.001, t + i * 0.13 + 0.11);
+                    osc.start(t + i * 0.13);
+                    osc.stop(t + i * 0.13 + 0.12);
+                });
+            } catch (_) {}
+        }
+        let currentDMPartner = null;
+        let chatTypingTimer = null;
+        let dmUnreadTotal = 0;
+        const DEFAULT_AVATAR_CHAT = DEFAULT_AVATAR;
+
+        // ─── Helpers ────────────────────────────────────────────────────────────
+
+        function chatAutoResize(el) {
+            el.style.height = 'auto';
+            el.style.height = Math.min(el.scrollHeight, 100) + 'px';
+        }
+
+        function chatScrollBottom(boxId) {
+            const box = document.getElementById(boxId);
+            if (box) box.scrollTop = box.scrollHeight;
+        }
+
+        function chatHandleKey(e) {
+            if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); sendChatMessage(); }
+        }
+        function dmHandleKey(e) {
+            if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); sendDMMessage(); }
+        }
+
+        function chatTyping() {
+            clearTimeout(chatTypingTimer);
+            chatTypingTimer = setTimeout(() => {
+                const el = document.getElementById('chat-typing-text');
+                if (el) el.textContent = '';
+            }, 2000);
+        }
+
+        function formatTime(str) { return str || ''; }
+
+        // ─── updateAuthStatus patch ─────────────────────────────────────────────
+        const _originalUpdateAuthStatus = window.updateAuthStatus;
+        window.updateAuthStatus = function() {
+            _originalUpdateAuthStatus();
+            const dmNav   = document.getElementById('nav-dm');
+            const chatNav = document.getElementById('nav-chat');
+            if (dmNav)   dmNav.classList.toggle('hidden', !currentUser);
+            if (chatNav) chatNav.classList.remove('hidden');
+            if (currentUser) {
+                initDMStream();
+                refreshDMUnreadBadge();
+            }
+        };
+
+        // ═══════════════════════════════════════════════════════════════════════
+        // ─── GLOBAL CHAT ────────────────────────────────────────────────────
+        // ═══════════════════════════════════════════════════════════════════════
+
+        function initChat() {
+            if (chatSSE && chatSSE.readyState !== EventSource.CLOSED) return;
+            loadChatHistory();
+            if (!currentUser) return;
+
+            chatSSE = new EventSource('/api/chat/stream');
+            const dot = document.getElementById('chat-status-dot');
+            chatSSE.onopen = () => { if (dot) dot.className = 'chat-connected-dot'; };
+            chatSSE.onmessage = (e) => {
+                try {
+                    const payload = JSON.parse(e.data);
+                    if (payload.type === 'message') {
+                        const isFromMe = currentUser && payload.data.author === currentUser.username;
+                        const chatVisible = !document.getElementById('chat-section').classList.contains('hidden');
+                        appendChatMessage(payload.data, false);
+                        if (!isFromMe && !chatVisible) playNotifSound();
+                    }
+                    if (payload.type === 'delete')  removeChatMessage(payload.id);
+                } catch (_) {}
+            };
+            chatSSE.onerror = () => { if (dot) dot.className = 'chat-disconnected-dot'; };
+        }
+
+        async function loadChatHistory() {
+            const box = document.getElementById('chat-messages-box');
+            if (!box) return;
+            box.innerHTML = '<div style="color:#444; font-size:0.85em; padding:10px;">Loading...</div>';
+            try {
+                const res = await localFetch('/api/chat/messages?limit=50');
+                const data = await res.json();
+                box.innerHTML = '';
+                if (Array.isArray(data)) data.forEach(m => appendChatMessage(m, true));
+                chatScrollBottom('chat-messages-box');
+            } catch (e) {
+                box.innerHTML = '<div style="color:#664444; font-size:0.85em; padding:10px;">Failed to load messages.</div>';
+            }
+        }
+
+        function appendChatMessage(msg, skipScroll) {
+            const box = document.getElementById('chat-messages-box');
+            if (!box) return;
+            const isMine = currentUser && msg.author === currentUser.username;
+            const div = document.createElement('div');
+            div.className = `chat-message ${isMine ? 'chat-mine' : 'chat-other'}`;
+            div.dataset.msgId = msg.id;
+            const avatar = msg.avatar_url || DEFAULT_AVATAR_CHAT;
+            const deleteBtn = (currentUser && (isMine || currentUser.isAdmin))
+                ? `<button class="msg-delete" onclick="deleteChatMsg(${msg.id})" title="Delete">✕</button>` : '';
+            div.innerHTML = `
+                <img class="msg-avatar" src="${encodeURI(avatar)}" onerror="this.src='${DEFAULT_AVATAR_CHAT}'"
+                     onclick="openProfileByName('${safeText(msg.author)}')">
+                <div class="msg-body">
+                    <div class="msg-header">
+                        <span class="msg-author" style="color:${msg.role_color || '#909090'}"
+                              onclick="openProfileByName('${safeText(msg.author)}')">${safeText(msg.author)}</span>
+                        <span class="msg-time">${formatTime(msg.created_at)}</span>
+                        ${deleteBtn}
+                    </div>
+                    <div class="msg-text">${safeText(msg.text)}</div>
+                </div>`;
+            box.appendChild(div);
+            if (!skipScroll) {
+                const nearBottom = box.scrollHeight - box.scrollTop - box.clientHeight < 120;
+                if (nearBottom) chatScrollBottom('chat-messages-box');
+            }
+        }
+
+        function removeChatMessage(id) {
+            const el = document.querySelector(`[data-msg-id="${id}"]`);
+            if (el) el.remove();
+        }
+
+        async function deleteChatMsg(id) {
+            if (!confirm('Delete this message?')) return;
+            const res = await localFetch(`/api/chat/messages/${id}`, { method: 'DELETE' });
+            const data = await res.json();
+            if (data.error) alert(data.error);
+        }
+
+        async function sendChatMessage() {
+            if (!currentUser) return alert('Please sign in first.');
+            const input = document.getElementById('chat-input');
+            const text = input.value.trim();
+            if (!text) return;
+            input.value = '';
+            input.style.height = 'auto';
+            const res = await localFetch('/api/chat/messages', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ text })
+            });
+            const data = await res.json();
+            if (data.error) { input.value = text; return alert(data.error); }
+        }
+
+        // ═══════════════════════════════════════════════════════════════════════
+        // ─── PRIVATE MESSAGES ───────────────────────────────────────────────
+        // ═══════════════════════════════════════════════════════════════════════
+
+        function initDM() { /* layout shown; conversations loaded on open */ }
+
+        function initDMStream() {
+            if (!currentUser) return;
+            if (dmSSE && dmSSE.readyState !== EventSource.CLOSED) return;
+            dmSSE = new EventSource('/api/dm/stream');
+            dmSSE.onmessage = (e) => {
+                try {
+                    const payload = JSON.parse(e.data);
+                    if (payload.type === 'message') {
+                        const msg = payload.data;
+                        if (currentDMPartner === msg.from_user) appendDMMessage(msg, false);
+                        loadDMConversations();
+                        refreshDMUnreadBadge();
+                        playNotifSound();
+                    }
+                } catch (_) {}
+            };
+        }
+
+        async function refreshDMUnreadBadge() {
+            if (!currentUser) return;
+            try {
+                const res = await localFetch('/api/dm/unread-count');
+                const data = await res.json();
+                const badge = document.getElementById('dm-unread-badge');
+                dmUnreadTotal = data.count || 0;
+                if (badge) {
+                    badge.textContent = dmUnreadTotal > 99 ? '99+' : dmUnreadTotal;
+                    badge.classList.toggle('hidden', dmUnreadTotal === 0);
+                }
+            } catch (_) {}
+        }
+
+        async function loadDMConversations() {
+            if (!currentUser) return;
+            const list = document.getElementById('dm-conv-list');
+            if (!list) return;
+            try {
+                const res = await localFetch('/api/dm/conversations');
+                const data = await res.json();
+                list.innerHTML = '';
+                if (!Array.isArray(data) || !data.length) {
+                    list.innerHTML = '<div style="padding:12px; font-size:0.8em; color:#444;">No conversations yet</div>';
+                    return;
+                }
+                data.forEach(conv => {
+                    const div = document.createElement('div');
+                    div.className = `dm-conv-item ${currentDMPartner === conv.partner ? 'active' : ''}`;
+                    div.dataset.partner = conv.partner;
+                    div.onclick = () => dmOpenConversation(conv.partner);
+                    const preview = conv.last_message
+                        ? safeText(conv.last_message.text.substring(0, 30)) + (conv.last_message.text.length > 30 ? '…' : '')
+                        : 'No messages yet';
+                    const unreadBadge = conv.unread_count > 0 ? `<span class="dm-unread-badge">${conv.unread_count}</span>` : '';
+                    div.innerHTML = `
+                        <img src="${encodeURI(conv.avatar_url || DEFAULT_AVATAR_CHAT)}" onerror="this.src='${DEFAULT_AVATAR_CHAT}'">
+                        <div class="dm-conv-info">
+                            <div class="dm-conv-name" style="color:${conv.role_color || '#ccc'}">${safeText(conv.partner)}</div>
+                            <div class="dm-conv-preview">${preview}</div>
+                        </div>
+                        ${unreadBadge}`;
+                    list.appendChild(div);
+                });
+            } catch (e) {
+                list.innerHTML = '<div style="padding:12px; font-size:0.8em; color:#664;">Error loading</div>';
+            }
+        }
+
+        async function dmOpenConversation(username) {
+            if (!username) return;
+            username = username.trim();
+            if (!username || !currentUser) return currentUser ? null : alert('Please sign in first.');
+
+            currentDMPartner = username;
+            navigate('/dm/' + encodeURIComponent(username));
+
+            const box = document.getElementById('dm-messages-box');
+            if (!box) { console.error('dm-messages-box not found'); return; }
+            box.innerHTML = '<div style="color:#444;font-size:0.85em;padding:10px;text-align:center;">Loading...</div>';
+            const newConvoRow = document.getElementById('dm-new-convo-row');
+            if (newConvoRow) newConvoRow.classList.add('hidden');
+            const inputRow = document.getElementById('dm-input-row');
+            if (inputRow) inputRow.style.display = 'flex';
+            const header = document.getElementById('dm-main-header');
+            if (header) header.innerHTML = `<span>Chat with</span> <b style="color:#cc3333;">${safeText(username)}</b>`;
+            document.querySelectorAll('.dm-conv-item').forEach(el => {
+                el.classList.toggle('active', el.dataset.partner === username);
+            });
+
+            await loadDMMessages(username);
+            setTimeout(() => { loadDMConversations(); refreshDMUnreadBadge(); }, 400);
+        }
+
+        async function loadDMMessages(partner) {
+            const box = document.getElementById('dm-messages-box');
+            try {
+                const res = await localFetch(`/api/dm/conversation/${encodeURIComponent(partner)}?limit=60`);
+                if (!res.ok) throw new Error('HTTP ' + res.status);
+                const data = await res.json();
+                if (currentDMPartner !== partner) return;
+                box.innerHTML = '';
+                if (!Array.isArray(data) || !data.length) {
+                    box.innerHTML = '<div style="color:#444;font-size:0.85em;padding:20px;text-align:center;">No messages yet. Say hello! 👋</div>';
+                    return;
+                }
+                data.forEach(m => appendDMMessage(m, true));
+                chatScrollBottom('dm-messages-box');
+            } catch (e) {
+                console.error('loadDMMessages error:', e);
+                box.innerHTML = '<div style="color:#664444;font-size:0.85em;padding:10px;">Failed to load messages: ' + e.message + '</div>';
+            }
+        }
+
+        function appendDMMessage(msg, skipScroll) {
+            const box = document.getElementById('dm-messages-box');
+            if (!box) return;
+            const isMine = currentUser && msg.from_user === currentUser.username;
+            const div = document.createElement('div');
+            div.className = `dm-message ${isMine ? 'dm-msg-mine' : 'dm-msg-other'}`;
+            div.dataset.msgId = msg.id;
+            const avatar = msg.avatar_url || DEFAULT_AVATAR_CHAT;
+            const deleteBtn = (currentUser && (isMine || currentUser.isAdmin))
+                ? `<button class="dm-msg-delete" onclick="deleteDMMsg(${msg.id})" title="Delete">✕</button>` : '';
+            div.innerHTML = `
+                <img class="msg-avatar" src="${encodeURI(avatar)}" onerror="this.src='${DEFAULT_AVATAR_CHAT}'"
+                     onclick="openProfileByName('${safeText(msg.from_user)}')">
+                <div>
+                    <div class="dm-msg-text">${safeText(msg.text)}</div>
+                    <span class="dm-msg-time">${formatTime(msg.created_at)}</span>
+                </div>
+                ${deleteBtn}`;
+            box.appendChild(div);
+            if (!skipScroll) chatScrollBottom('dm-messages-box');
+        }
+
+        async function deleteDMMsg(id) {
+            if (!confirm('Delete this message?')) return;
+            const res = await localFetch(`/api/dm/${id}`, { method: 'DELETE' });
+            const data = await res.json();
+            if (data.error) return alert(data.error);
+            const el = document.querySelector(`[data-msg-id="${id}"]`);
+            if (el) el.remove();
+        }
+
+        async function sendDMMessage() {
+            if (!currentUser || !currentDMPartner) return;
+            const input = document.getElementById('dm-input');
+            const text = input.value.trim();
+            if (!text) return;
+            input.value = '';
+            input.style.height = 'auto';
+            const res = await localFetch('/api/dm/send', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ to: currentDMPartner, text })
+            });
+            const data = await res.json();
+            if (data.error) { input.value = text; return alert(data.error); }
+            appendDMMessage(data.message, false);
+            loadDMConversations();
+        }
+
+        function dmStartNew() {
+            const row = document.getElementById('dm-new-convo-row');
+            row.classList.remove('hidden');
+            document.getElementById('dm-new-username').value = '';
+            document.getElementById('dm-new-username').focus();
+        }
+
+        window.openDMWith = function(username) {
+            showSection('dm');
+            setTimeout(() => dmOpenConversation(username), 100);
+        };
+
+        // Refresh DM unread badge every 30 seconds
+        setInterval(() => { if (currentUser) refreshDMUnreadBadge(); }, 30000);
+
+        // ═══════════════════════════════════════════════════════════════════════
+        // ─── NOTIFICATIONS ──────────────────────────────────────────────────
+        // ═══════════════════════════════════════════════════════════════════════
+
+        let notifSSE = null;
+        let notifUnread = 0;
+        let notifDropdownOpen = false;
+
+        function initNotifStream() {
+            if (!currentUser) return;
+            if (notifSSE && notifSSE.readyState !== EventSource.CLOSED) return;
+            notifSSE = new EventSource('/api/notifications/stream');
+            notifSSE.onmessage = (e) => {
+                try {
+                    const payload = JSON.parse(e.data);
+                    if (payload.type === 'notification') {
+                        notifUnread++;
+                        updateNotifBadge();
+                        playNotifSound();
+                        // Prepend to dropdown if open
+                        if (notifDropdownOpen) loadNotifications();
+                    }
+                } catch (_) {}
+            };
+        }
+
+        function updateNotifBadge() {
+            const badge = document.getElementById('notif-badge');
+            if (!badge) return;
+            badge.textContent = notifUnread > 99 ? '99+' : notifUnread;
+            badge.classList.toggle('hidden', notifUnread === 0);
+        }
+
+        async function refreshNotifBadge() {
+            if (!currentUser) return;
+            try {
+                const res = await localFetch('/api/notifications/unread-count');
+                const data = await res.json();
+                notifUnread = data.count || 0;
+                updateNotifBadge();
+            } catch (_) {}
+        }
+
+        async function loadNotifications() {
+            const list = document.getElementById('notif-list');
+            if (!list) return;
+            try {
+                const res = await localFetch('/api/notifications?limit=30');
+                const items = await res.json();
+                if (!Array.isArray(items) || !items.length) {
+                    list.innerHTML = '<div class="notif-empty">No notifications yet</div>';
+                    return;
+                }
+                list.innerHTML = '';
+                items.forEach(n => {
+                    const div = document.createElement('div');
+                    div.className = `notif-item ${n.is_read ? '' : 'unread'}`;
+                    div.onclick = () => handleNotifClick(n);
+
+                    let icon = '🔔';
+                    let text = '';
+                    if (n.type === 'reply') {
+                        icon = '💬';
+                        text = `<b>${safeText(n.actor)}</b> replied to your post <b>${safeText((n.topic_title || '').substring(0, 40))}</b>`;
+                    } else if (n.type === 'upvote') {
+                        icon = '▲';
+                        text = `<b>${safeText(n.actor)}</b> upvoted your post <b>${safeText((n.topic_title || '').substring(0, 40))}</b>`;
+                    } else if (n.type === 'profile_comment') {
+                        icon = '📝';
+                        text = `<b>${safeText(n.actor)}</b> left a comment on your profile wall`;
+                    }
+
+                    div.innerHTML = `
+                        <span class="notif-icon">${icon}</span>
+                        <div class="notif-body">
+                            <div class="notif-text">${text}</div>
+                            <div class="notif-time">${safeText(n.created_at || '')}</div>
+                        </div>
+                    `;
+                    list.appendChild(div);
+                });
+            } catch (e) {
+                list.innerHTML = '<div class="notif-empty">Failed to load notifications</div>';
+            }
+        }
+
+        async function handleNotifClick(n) {
+            // Mark as read
+            await localFetch(`/api/notifications/${n.id}/read`, { method: 'POST' });
+            notifDropdownOpen = false;
+            document.getElementById('notif-dropdown').classList.remove('open');
+            await refreshNotifBadge();
+            // Navigate
+            if (n.type === 'reply' && n.topic_id) {
+                openThread(n.topic_id);
+            } else if (n.type === 'upvote' && n.topic_id) {
+                openThread(n.topic_id);
+            } else if (n.type === 'profile_comment' && n.profile_id) {
+                openProfile(n.profile_id);
+            }
+        }
+
+        async function markAllNotifsRead() {
+            await localFetch('/api/notifications/read-all', { method: 'POST' });
+            notifUnread = 0;
+            updateNotifBadge();
+            loadNotifications();
+        }
+
+        function toggleNotifDropdown() {
+            notifDropdownOpen = !notifDropdownOpen;
+            const dropdown = document.getElementById('notif-dropdown');
+            dropdown.classList.toggle('open', notifDropdownOpen);
+            if (notifDropdownOpen) loadNotifications();
+        }
+
+        // Close dropdown on outside click
+        document.addEventListener('click', (e) => {
+            const wrap = document.getElementById('notif-bell-wrap');
+            if (wrap && !wrap.contains(e.target) && notifDropdownOpen) {
+                notifDropdownOpen = false;
+                document.getElementById('notif-dropdown').classList.remove('open');
+            }
+        });
+
+        // Patch updateAuthStatus to show/hide bell
+        const _origUpdateAuth2 = window.updateAuthStatus;
+        window.updateAuthStatus = function() {
+            _origUpdateAuth2();
+            const bellWrap = document.getElementById('notif-bell-wrap');
+            if (bellWrap) bellWrap.style.display = currentUser ? 'inline-block' : 'none';
+            if (currentUser) {
+                initNotifStream();
+                refreshNotifBadge();
+            }
+        };
+
+        // Poll unread count every 60 seconds
+        setInterval(() => { if (currentUser) refreshNotifBadge(); }, 60000);
+
+
+        // ═══════════════════════════════════════════════════════════════════
+        // ── BACKGROUND IMAGE MANAGEMENT ─────────────────────────────────
+        // ═══════════════════════════════════════════════════════════════════
+        function applyForumBg(url) {
+            if (url) {
+                document.documentElement.style.setProperty('--forum-bg-image', `url("${encodeURI(url)}")`);
+            } else {
+                document.documentElement.style.setProperty('--forum-bg-image', 'none');
+            }
+            const preview = document.getElementById('forum-bg-preview');
+            if (preview) preview.textContent = url ? ('current: ' + url.split('/').pop().split('?')[0]) : 'no background set';
+        }
+        function applyAboutBg(url) {
+            if (url) {
+                document.documentElement.style.setProperty('--about-bg-image', `url("${encodeURI(url)}")`);
+            } else {
+                document.documentElement.style.setProperty('--about-bg-image', 'none');
+            }
+            const preview = document.getElementById('about-bg-preview');
+            if (preview) preview.textContent = url ? ('current: ' + url.split('/').pop().split('?')[0]) : 'no background set';
+        }
+        async function loadBackgrounds() {
+            try {
+                const [fr, ab] = await Promise.all([
+                    localFetch('/api/bg/forum').then(r => r.json()),
+                    localFetch('/api/bg/about').then(r => r.json()),
+                ]);
+                applyForumBg(fr.url || '');
+                applyAboutBg(ab.url || '');
+            } catch (e) {
+                // backgrounds are optional — ignore errors
+            }
+        }
+        function updateBgAdminPanel() {
+            const panel = document.getElementById('forum-bg-admin-panel');
+            if (panel) panel.classList.toggle('hidden', !currentUser || !currentUser.isAdmin);
+        }
+        // ── Forum BG ──────────────────────────────────────────────────────
+        async function forumBgUpload(input) {
+            if (!currentUser || !currentUser.isAdmin) return;
+            if (!input.files || !input.files[0]) return;
+            const label = document.getElementById('forum-bg-label');
+            if (label) label.textContent = 'Uploading…';
+            const fd = new FormData();
+            fd.append('bg', input.files[0]);
+            try {
+                const res = await localFetch('/api/bg/forum/upload', { method: 'POST', body: fd });
+                const data = await res.json();
+                if (res.ok && data.url) {
+                    applyForumBg(data.url);
+                } else {
+                    alert(data.error || 'Upload failed.');
+                }
+            } catch (e) {
+                alert('Upload failed.');
+            } finally {
+                if (label) label.textContent = 'Upload image';
+                input.value = '';
+            }
+        }
+        async function forumBgRemove() {
+            if (!currentUser || !currentUser.isAdmin) return;
+            if (!confirm('Remove forum background image?')) return;
+            try {
+                const res = await localFetch('/api/bg/forum', { method: 'DELETE' });
+                if (res.ok) applyForumBg('');
+                else { const d = await res.json(); alert(d.error || 'Failed.'); }
+            } catch (e) { alert('Failed.'); }
+        }
+        // ── About BG ──────────────────────────────────────────────────────
+        async function aboutBgUpload(input) {
+            if (!currentUser || !currentUser.isAdmin) return;
+            if (!input.files || !input.files[0]) return;
+            const label = document.getElementById('about-bg-label');
+            if (label) label.textContent = 'Uploading…';
+            const fd = new FormData();
+            fd.append('bg', input.files[0]);
+            try {
+                const res = await localFetch('/api/bg/about/upload', { method: 'POST', body: fd });
+                const data = await res.json();
+                if (res.ok && data.url) {
+                    applyAboutBg(data.url);
+                } else {
+                    alert(data.error || 'Upload failed.');
+                }
+            } catch (e) {
+                alert('Upload failed.');
+            } finally {
+                if (label) label.textContent = 'Upload image';
+                input.value = '';
+            }
+        }
+        async function aboutBgRemove() {
+            if (!currentUser || !currentUser.isAdmin) return;
+            if (!confirm('Remove About page background image?')) return;
+            try {
+                const res = await localFetch('/api/bg/about', { method: 'DELETE' });
+                if (res.ok) applyAboutBg('');
+                else { const d = await res.json(); alert(d.error || 'Failed.'); }
+            } catch (e) { alert('Failed.'); }
+        }
+
+        
+    </script>
+
+    <!-- Create Thread modal — прямой потомок body, вне .layout-container,
+         чтобы z-index сравнивался относительно корневого stacking context
+         и сайдбар не перекрывал оверлей. -->
+    <div id="create-thread-modal-overlay" class="hidden" style="position:fixed; inset:0; background:rgba(0,0,0,0.7); z-index:300; display:flex; align-items:center; justify-content:center; padding:20px;" onclick="if(event.target===this) toggleCreateThreadModal(false)">
+        <div id="create-thread-block" class="block" style="max-width:600px; width:100%; max-height:90vh; overflow-y:auto; margin-bottom:0;">
+            <div class="flex">
+                <h3 style="margin:0;">Create New Thread</h3>
+                <button onclick="toggleCreateThreadModal(false)" style="width:auto; padding:4px 10px;">✕</button>
+            </div>
+            <input type="text" id="thread-title" placeholder="Thread title">
+            <textarea id="thread-text" rows="6" placeholder="Write your post..."></textarea>
+            <input type="text" id="thread-tags" placeholder="Tags (comma-separated)">
+
+            <div class="file-upload-wrapper">
+                <label for="thread-image" id="thread-image-label" class="file-upload-btn">Attach files (up to 5, max 5 MB each)</label>
+                <input type="file" id="thread-image" class="file-input-hidden" multiple accept="image/jpeg,image/png,image/gif,image/webp,audio/*,video/*" onchange="updateMultiFileLabel('thread-image', 'thread-image-label')">
+            </div>
+
+            <div id="admin-options" class="hidden" style="border: 1px solid #4a0000; padding: 15px; margin: 10px 0; background: #0a0303; border-radius: 4px;">
+                <label class="custom-checkbox-label">
+                    <input type="checkbox" id="thread-is-pinned">
+                    <span class="checkbox-box"></span>Pin this thread
+                </label>
+                <label class="custom-checkbox-label">
+                    <input type="checkbox" id="thread-is-featured">
+                    <span class="checkbox-box"></span>Feature this thread
+                </label>
+            </div>
+            <button onclick="createThread()">Publish Thread</button>
+        </div>
+    </div>
+
+    <footer style="
+        margin-top: 40px; padding: 20px; text-align: center;
+        border-top: 1px solid #220c0c; color: #444; font-size: 0.82em;
+        background-color: #080808;
+    ">
+        <div style="margin-bottom: 6px;">
+            <a href="#" onclick="showSection('forum')" style="color:#660000; font-weight:bold; font-family:monospace; font-size:1.1em;">YBNUCTBO</a>
+        </div>
+        <div style="margin-bottom: 8px; display: flex; gap: 18px; justify-content: center; flex-wrap: wrap;">
+            <a href="https://discord.gg/uskfpHgtbZ" target="_blank" style="color:#553333;">Discord</a>
+            <a href="https://t.me/YBNUCTBO" target="_blank" style="color:#553333;">Telegram</a>
+        </div>
+        <div style="color: #333;">
+            &copy; <span id="footer-year"></span> <span style="color:#553333; font-weight:bold;">intelwebz corporation</span> &mdash; All rights reserved.
+        </div>
+        <div style="margin-top: 6px;">
+            <a href="mailto:intelwebz@dev.team" style="color:#553333;">intelwebz@dev.team</a>
+        </div>
+        <script>document.getElementById('footer-year').textContent = new Date().getFullYear();</script>
+    </footer>
+</body>
+</html>
